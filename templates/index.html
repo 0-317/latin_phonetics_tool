@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Разделение слогов латинского языка</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            margin-top: 10px;
+            padding: 8px 24px;
+            font-size: 16px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 2px solid #eee;
+        }
+        .word-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        strong {
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <h2>Инструмент для разделения слогов латинского текста </h2>
+    <form method="POST" action="">
+        <textarea name="latin_text" rows="6" cols="80" placeholder="Введите латинский текст, например: famē coāctā vulpēs altā in vīneā"></textarea>
+        <br>
+        <button type="submit">Разделить слоги и отметить ударение</button>
+    </form>
+
+    <div class="result-area">
+        <h3>Результат обработки</h3>
+        {% if result %}
+            {% for word_item in result %}
+                <div class="word-item">
+                    <strong>Слово：</strong>{{ word_item.word }}
+                    <br>
+                    <strong>Слоги ：</strong>
+                    {% for syllable in word_item.syllables %}
+                        {{ syllable.syllable_str_accented }}（{{ syllable.type }} слог, {{ syllable.length }}）
+                        {% if not loop.last %} | {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Результатов нет. Введите латинский текст и нажмите кнопку отправки.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

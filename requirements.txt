@@ -1,0 +1,4 @@
+﻿Flask==2.3.3
+Flask-SQLAlchemy==3.1.1
+Flask-WTF==1.2.1
+python-dotenv==1.0.0
