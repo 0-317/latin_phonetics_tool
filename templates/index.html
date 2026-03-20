@@ -1,10 +1,16 @@
 ﻿<!DOCTYPE html>
+<!-- 页面语言由后端传入：lang -->
 <html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
+    <!-- 页面标题：来自后端 L.title -->
     <title>{{ L.title }}</title>
+
+    <!-- 引入图表库 Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
+        /* 全局样式：页面布局、字体、颜色 */
         body {
             font-family: Arial, sans-serif;
             max-width: 1200px;
@@ -12,6 +18,7 @@
             padding: 20px;
             background: #f9f9f9;
         }
+        /* 语言切换栏 */
         .lang-bar {
             text-align: right;
             margin-bottom: 10px;
@@ -30,6 +37,7 @@
             color: #fff;
             border-color: #4285f4;
         }
+        /* 经典文本区域 */
         .classic-section {
             margin: 15px 0;
             text-align: center;
@@ -56,6 +64,7 @@
         h2, h3 {
             color: #333;
         }
+        /* 输入框 */
         textarea {
             width: 100%;
             padding: 12px;
@@ -85,6 +94,7 @@
             padding: 24px;
             border-radius: 8px;
         }
+        /* 统计卡片布局 */
         .stats-grid {
             display: flex;
             flex-wrap: wrap;
@@ -102,6 +112,7 @@
         .chart-container {
             height: 220px;
         }
+        /* 表格样式 */
         .table-box {
             overflow-x: auto;
         }
@@ -129,14 +140,16 @@
 
 <body>
 
-<!-- 语言切换按钮（有字） -->
+<!-- ====================== 语言切换按钮 ====================== -->
+<!-- 点击切换语言：?lang=ru / zh / en -->
 <div class="lang-bar">
     <button class="lang-btn {{ 'active' if lang == 'ru' else '' }}" onclick="location.href='?lang=ru'">Русский</button>
     <button class="lang-btn {{ 'active' if lang == 'zh' else '' }}" onclick="location.href='?lang=zh'">中文</button>
     <button class="lang-btn {{ 'active' if lang == 'en' else '' }}" onclick="location.href='?lang=en'">English</button>
 </div>
 
-<!-- 经典文本按钮（全部有字） -->
+<!-- ====================== 经典文本按钮 ====================== -->
+<!-- 数据来自后端 classic_texts -->
 <div class="classic-section">
     <div class="classic-title">
         {% if lang == 'ru' %}Классические тексты:
@@ -145,6 +158,7 @@
         {% endif %}
     </div>
     <div class="classic-buttons">
+        <!-- 循环渲染5个经典文本按钮 -->
         {% for txt in classic_texts %}
         <button class="classic-btn" onclick="loadText('{{ txt.text | replace("'", "\\'") | replace('"', '\\"') }}')">
             {% if lang == 'ru' %}{{ txt.name_ru }}
@@ -156,21 +170,27 @@
     </div>
 </div>
 
+<!-- 页面主标题 -->
 <h2 style="text-align:center;">{{ L.title }}</h2>
 
+<!-- ====================== 输入表单 ====================== -->
 <div class="form-box">
     <label style="font-weight:bold; display:block; margin-bottom:8px;">{{ L.input_label }}</label>
+    <!-- POST 方式提交给后端 / -->
     <form method="post">
         <textarea name="latin_text" id="latin_text" rows="6" placeholder="{{ L.placeholder }}"></textarea>
         <button type="submit" class="submit-btn">{{ L.button_text }}</button>
     </form>
 </div>
 
+<!-- ====================== 结果展示区域 ====================== -->
 <div class="result">
+    <!-- 如果有统计结果 → 显示图表和表格 -->
     {% if stats %}
     <h3>{{ L.stats_title }}</h3>
     <p>{{ L.total_words }}: {{ stats.total_words }} &nbsp;|&nbsp; {{ L.total_syllables }}: {{ stats.total_syllables }}</p>
 
+    <!-- 三个图表：开闭、长短、音步占比 -->
     <div class="stats-grid">
         <div class="stat-card">
             <h4 style="text-align:center;">{{ L.structure_title }}</h4>
@@ -186,6 +206,7 @@
         </div>
     </div>
 
+    <!-- 详细音步分析表格 -->
     <h3 style="margin-top:30px;">{{ L.details_title }}</h3>
     <div class="table-box">
         <table>
@@ -200,6 +221,7 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- 循环显示每一组音步 -->
                 {% for item in stats.feet_details %}
                 <tr>
                     <td>{{ loop.index }}</td>
@@ -209,6 +231,7 @@
                     <td>{{ item.ls }}</td>
                     <td>{{ item.name_local }}</td>
                 </tr>
+                <!-- 无数据时显示 -->
                 {% else %}
                 <tr><td colspan="6" class="empty">{{ L.no_data }}</td></tr>
                 {% endfor %}
@@ -216,13 +239,16 @@
         </table>
     </div>
 
+    <!-- ====================== 图表绘制 JS ====================== -->
     <script>
         document.addEventListener('DOMContentLoaded', function(){
+            // 从后端获取音步数据
             const feetLabels = {{ stats.feet_labels|tojson }};
             const feetValues = {{ stats.feet_values|tojson }};
             const footMap = {{ L.foot_names|tojson }};
             const names = feetLabels.map(k => footMap[k]||k);
 
+            // 图1：开/闭音节
             new Chart(document.getElementById('c1'), {
                 type: 'doughnut',
                 data: {
@@ -232,6 +258,7 @@
                 options: { maintainAspectRatio: false }
             });
 
+            // 图2：长/短音节
             new Chart(document.getElementById('c2'), {
                 type: 'pie',
                 data: {
@@ -241,6 +268,7 @@
                 options: { maintainAspectRatio: false }
             });
 
+            // 图3：音步比例饼图
             new Chart(document.getElementById('c4'), {
                 type: 'pie',
                 data: { labels: names, datasets: [{ data: feetValues }] },
@@ -248,11 +276,14 @@
             });
         });
     </script>
+
+    <!-- 无结果时显示 -->
     {% else %}
     <div class="empty">{{ L.no_results }}</div>
     {% endif %}
 </div>
 
+<!-- 点击经典文本，自动填入输入框 -->
 <script>
     function loadText(text) {
         document.getElementById('latin_text').value = text;

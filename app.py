@@ -1,8 +1,15 @@
-﻿from flask import Flask, render_template, request
+﻿# 导入 Flask 框架核心模块
+from flask import Flask, render_template, request
+
+# 导入核心算法：文本处理 + 统计分析（来自 project/hexingongneng.py）
 from project.hexingongneng import process_latin_text, analyze_statistics
 
+# 初始化 Flask 应用
 app = Flask(__name__)
 
+# ====================== 多语言配置 ======================
+# 俄、中、英 三语言界面文本字典
+# 【关键呼应】这里的 L 会直接传给前端 index.html 中的 {{ L.xxx }} 使用
 LANGUAGE_MAP = {
     'ru': {
         'lang': 'ru',
@@ -30,6 +37,7 @@ LANGUAGE_MAP = {
         'long': 'Долгий',
         'short': 'Краткий',
         'no_results': 'Введите латинский текст и нажмите кнопку.',
+        # 音步名称（俄文）
         'foot_names': {
             'SL': 'Ямб',
             'LS': 'Трохей',
@@ -68,6 +76,7 @@ LANGUAGE_MAP = {
         'long': '长音节',
         'short': '短音节',
         'no_results': '请输入文本并提交。',
+        # 音步名称（中文）
         'foot_names': {
             'SL': '抑扬格',
             'LS': '扬抑格',
@@ -93,7 +102,6 @@ LANGUAGE_MAP = {
         'length_title': 'Syllable Length',
         'feet_prop_title': 'Foot Proportion',
         'details_title': 'Detailed Foot Analysis',
-        'details_desc': 'This table shows each metrical foot found.',
         'th_num': '#',
         'th_word': 'Word',
         'th_syllables': 'Syllables',
@@ -106,6 +114,7 @@ LANGUAGE_MAP = {
         'long': 'Long',
         'short': 'Short',
         'no_results': 'Enter text and submit.',
+        # 音步名称（英文）
         'foot_names': {
             'SL': 'Iambus',
             'LS': 'Trochee',
@@ -120,7 +129,9 @@ LANGUAGE_MAP = {
     }
 }
 
-# 内置经典拉丁文本库
+# ====================== 经典文本库 ======================
+# 内置5段经典拉丁语，前端一键加载
+# 【关键呼应】传给前端 index.html 循环渲染按钮
 CLASSICTEXTS = [
     {
         "name_ru": "1. Энеида (Вергилий) — начало",
@@ -154,22 +165,33 @@ CLASSICTEXTS = [
     }
 ]
 
+# ====================== 主路由（首页） ======================
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # 1. 获取语言参数（默认俄语）
     lang = request.args.get('lang', 'ru')
     if lang not in LANGUAGE_MAP:
         lang = 'ru'
-    L = LANGUAGE_MAP[lang]
+    L = LANGUAGE_MAP[lang]  # 当前语言包
 
-    latin_result = []
-    stats_data = None
+    # 2. 初始化结果变量
+    latin_result = []    # 音节划分原始结果
+    stats_data = None    # 图表+表格统计数据
 
+    # 3. 用户提交文本 → 开始分析
     if request.method == 'POST':
+        # 获取用户输入
         input_content = request.form.get('latin_text', '').strip()
+        
+        # 【调用核心算法】音节划分、开闭、长短、重音
         latin_result = process_latin_text(input_content)
+        
+        # 【调用统计函数】生成图表数据
         if latin_result:
             stats_data = analyze_statistics(latin_result)
 
+            # ====================== 表格数据拼接 ======================
+            # 把开闭、长短、音步名称 转为当前语言
             if stats_data and 'feet_details' in stats_data:
                 for item in stats_data['feet_details']:
                     for wd in latin_result:
@@ -178,6 +200,7 @@ def index():
                             if len(sp) == 2:
                                 s1, s2 = sp[0], sp[1]
                                 s1t = s2t = s1l = s2l = ''
+                                # 匹配音节类型
                                 for syl in wd['syllables']:
                                     if syl['syllable_str'] == s1:
                                         s1t = syl['type']
@@ -186,6 +209,7 @@ def index():
                                         s2t = syl['type']
                                         s2l = syl['length']
 
+                                # 类型翻译函数
                                 def t(v):
                                     if v == 'открытый': return L['open']
                                     if v == 'закрытый': return L['closed']
@@ -195,20 +219,22 @@ def index():
                                     if v == 'короткий': return L['short']
                                     return ''
 
+                                # 拼接前端表格显示内容
                                 item['oc'] = f"{s1} ({t(s1t)}) + {s2} ({t(s2t)})"
                                 item['ls'] = f"{s1} ({l(s1l)}) + {s2} ({l(s2l)})"
                                 item['name_local'] = L['foot_names'].get(item['pattern'], 'Неизвестно')
                             break
 
+    # 4. 渲染前端页面，把所有数据传给 index.html
     return render_template(
-    'index.html', 
-    result=latin_result,
-    stats=stats_data,
-    lang=lang,
-    L=L,
-    classic_texts=CLASSICTEXTS  
-)
+        'index.html', 
+        result=latin_result,    # 单词音节结果
+        stats=stats_data,       # 统计图表数据
+        lang=lang,              # 当前语言
+        L=L,                    # 多语言文本
+        classic_texts=CLASSICTEXTS  # 经典文本库
+    )
 
-
+# 启动应用
 if __name__ == '__main__':
     app.run(debug=True)
