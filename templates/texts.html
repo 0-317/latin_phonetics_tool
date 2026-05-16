@@ -1,0 +1,299 @@
+﻿<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ L.texts_title }}</title>
+    <style>
+        /* ========== 全站统一样式变量 ========== */
+        :root {
+            --bg-page: #F9F2E8;
+            --bg-card: #FFFFFF;
+            --color-nav: #D4B98C;
+            --color-primary: #B8860B;
+            --color-hover: #F8F0E3;
+            --color-text: #4A3C28;
+            --color-title: #1A1200;
+            --color-accent: #B50404;
+            --color-text-light: #8B7D6B;
+            --color-border: #E8DFD0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 中文典雅字体 */
+        body {
+            font-family: "Noto Serif SC", "SimSun", "Microsoft YaHei", serif;
+            font-size: 18px;
+            font-weight: 500;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.8;
+        }
+
+        /* 英/俄 瘦高古典字体 */
+        :lang(en), :lang(ru) {
+            font-family: "PT Serif", "EB Garamond", "Times New Roman", serif;
+            font-stretch: 92%;
+            letter-spacing: 0.3px;
+        }
+
+        /* 导航栏统一样式 */
+        .navbar {
+            background: var(--color-nav);
+            padding: 15px 24px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-bottom: 2px solid var(--color-accent);
+        }
+        .navbar a {
+            color: var(--color-title);
+            text-decoration: none;
+            margin-right: 28px;
+            font-weight: bold;
+            font-size: 17px;
+            transition: all 0.2s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        /* 英/俄导航字体放大 */
+        .navbar a:lang(en),
+        .navbar a:lang(ru) {
+            font-size: 19px;
+        }
+        .navbar a:hover {
+            background: var(--color-hover);
+            color: var(--color-primary);
+        }
+
+        /* 语言切换按钮 */
+        .lang-bar {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .lang-btn {
+            padding: 8px 16px;
+            margin-left: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--bg-card);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .lang-btn.active {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-accent);
+        }
+        .lang-btn:hover:not(.active) {
+            background: var(--color-hover);
+            border-color: var(--color-accent);
+        }
+
+        /* 内容容器 */
+        .content-box {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-left: 3px solid var(--color-accent);
+        }
+
+        /* 标题样式 */
+        h2 {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--color-title);
+            margin-bottom: 28px;
+            letter-spacing: 1px;
+            font-family: inherit;
+        }
+        h4 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--color-title);
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        /* 文本卡片 - 左右布局 */
+        .text-card {
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 20px;
+            margin: 18px 0;
+            background: var(--bg-card);
+            display: flex;
+            align-items: flex-start;
+            gap: 30px; /* 图片放大后，间距也适当增加 */
+        }
+        /* 卡片左侧图片样式（已再次放大） */
+        .card-img {
+            width: 200px;    /* 原160px，放大25% */
+            height: 280px;   /* 原220px，放大27% */
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        /* 图片加载失败时显示的默认背景 */
+        .card-img.error {
+            background: var(--color-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-light);
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
+        /* 卡片内容区域 */
+        .card-content {
+            flex: 1;
+        }
+
+        .text-card p {
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        em {
+            font-style: italic;
+        }
+
+        /* 分析按钮统一样式 */
+        .analyze-btn {
+            background: var(--color-primary);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .analyze-btn:hover {
+            background: #976a00;
+        }
+    </style>
+</head>
+<body>
+    <!-- 统一导航栏 -->
+    <div class="navbar">
+        <a href="/?lang={{ lang }}">{{ L.nav_home }}</a>
+        <a href="/theory?lang={{ lang }}">{{ L.nav_theory }}</a>
+        <a href="/guide?lang={{ lang }}">{{ L.nav_guide }}</a>
+        <a href="/texts?lang={{ lang }}">{{ L.nav_texts }}</a>
+        <a href="/about?lang={{ lang }}">{{ L.nav_about }}</a>
+        <a href="/references?lang={{ lang }}">{{ L.nav_refs }}</a>
+    </div>
+
+    <!-- 语言切换 -->
+    <div class="lang-bar">
+        <button class="lang-btn {{ 'active' if lang == 'ru' else '' }}" onclick="switchLang('ru')">Русский</button>
+        <button class="lang-btn {{ 'active' if lang == 'zh' else '' }}" onclick="switchLang('zh')">中文</button>
+        <button class="lang-btn {{ 'active' if lang == 'en' else '' }}" onclick="switchLang('en')">English</button>
+    </div>
+
+    <div class="content-box">
+        <h2>{{ L.texts_title }}</h2>
+
+        <!-- 第一篇：埃涅阿斯纪 维吉尔 + 图片 -->
+        <div class="text-card">
+            <img src="/static/images/virgil.jpg" class="card-img" alt="埃涅阿斯纪" 
+                 width="200" height="280"
+                 onerror="this.classList.add('error'); this.alt='维吉尔 图片加载失败'">
+            <div class="card-content">
+                <h4>
+                    {% if lang == 'ru' %}Энеида Вергилия - Начало
+                    {% elif lang == 'zh' %}埃涅阿斯纪 维吉尔 — 开篇
+                    {% else %}Aeneid by Virgil - Opening
+                    {% endif %}
+                </h4>
+                <p><em>Arma virumque cano, Troiae qui primus ab oris<br>
+Italiam, fato profugus, Laviniaque venit<br>
+litora, multum ille et terris iactatus et alto<br>
+vi superum saevae memorem Iunonis ob iram;<br>
+multa quoque et bello passus, dum conderet urbem,<br>
+inferretque deos Latio, genus unde Latinum,<br>
+Albanique patres, atque altae moenia Romae.<br><br>
+Musa, mihi causas memora, quo numine laeso,<br>
+quidve dolens, regina deum tot volvere casus<br>
+insignem pietate virum, tot adire labores<br>
+impulerit. Tantaene animis caelestibus irae?</em></p>
+                <button class="analyze-btn" onclick="analyzeText('ARMA virumque cano, Troiae qui primus ab oris Italiam, fato profugus, Laviniaque venit litora, multum ille et terris iactatus et alto vi superum saevae memorem Iunonis ob iram; multa quoque et bello passus, dum conderet urbem, inferretque deos Latio, genus unde Latinum, Albanique patres, atque altae moenia Romae. Musa, mihi causas memora, quo numine laeso, quidve dolens, regina deum tot volvere casus insignem pietate virum, tot adire labores impulerit. Tantaene animis caelestibus irae?')">
+                    {{ L.btn_analyze }}
+                </button>
+            </div>
+        </div>
+
+        <!-- 第二篇：反喀提林演说 西塞罗 + 图片 -->
+        <div class="text-card">
+            <img src="/static/images/cicero.jpg" class="card-img" alt="反喀提林演说" 
+                 width="200" height="280"
+                 onerror="this.classList.add('error'); this.alt='西塞罗 图片加载失败'">
+            <div class="card-content">
+                <h4>
+                    {% if lang == 'ru' %}Речь против Катилины Цицерона - O tempora, o mores!
+                    {% elif lang == 'zh' %}反喀提林演说 西塞罗 — O tempora, o mores!
+                    {% else %}Against Catiline by Cicero - O tempora, o mores!
+                    {% endif %}
+                </h4>
+                <p><em>O tempora, o mores!<br>
+Quo usque tandem abutere, Catilina, patientia nostra? Quam diu etiam furor iste tuus nos eludet? Quem ad finem sese effrenata iactabit audacia?<br>
+Nihilne te nocturnum praesidium Palati, nihil urbis vigiliae, nihil timor populi, nihil concursus bonorum omnium, nihil hic munitissimus habendi senatus locus, nihil horum ora vultusque moverunt?<br>
+Patere tua consilia non sentis, constrictam iam horum omnium scientia teneri coniurationem tuam non vides?<br>
+Quid proxima, quid superiore nocte egeris, ubi fueris, quos convocaveris, quid consilii ceperis, quem nostrum ignorare arbitraris?</em></p>
+                <button class="analyze-btn" onclick="analyzeText('O tempora, o mores! Quo usque tandem abutere, Catilina, patientia nostra? Quam diu etiam furor iste tuus nos eludet? Quem ad finem sese effrenata iactabit audacia? Nihilne te nocturnum praesidium Palati, nihil urbis vigiliae, nihil timor populi, nihil concursus bonorum omnium, nihil hic munitissimus habendi senatus locus, nihil horum ora vultusque moverunt? Patere tua consilia non sentis, constrictam iam horum omnium scientia teneri coniurationem tuam non vides? Quid proxima, quid superiore nocte egeris, ubi fueris, quos convocaveris, quid consilii ceperis, quem nostrum ignorare arbitraris?')">
+                    {{ L.btn_analyze }}
+                </button>
+            </div>
+        </div>
+
+        <!-- 第三篇：高卢战记 凯撒 + 图片 -->
+        <div class="text-card">
+            <img src="/static/images/caesar.jpg" class="card-img" alt="高卢战记" 
+                 width="200" height="280"
+                 onerror="this.classList.add('error'); this.alt='凯撒 图片加载失败'">
+            <div class="card-content">
+                <h4>
+                    {% if lang == 'ru' %}Галльская война Цезаря - Книга 1, Глава 1
+                    {% elif lang == 'zh' %}高卢战记 凯撒 — 第一卷・第一章
+                    {% else %}Gallic Wars by Caesar - Book 1, Chapter 1
+                    {% endif %}
+                </h4>
+                <p><em>Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.<br>
+Hi omnes lingua, institutis, legibus inter se differunt. Gallos ab Aquitanis Garumna flumen, a Belgis Matrona et Sequana dividit.<br>
+Horum omnium fortissimi sunt Belgae, propterea quod a cultu atque humanitate provinciae longissime absunt, minimeque ad eos mercatores saepe commeant atque ea quae ad effeminandos animos pertinent important, proximique sunt Germanis, qui trans Rhenum incolunt, quibuscum continenter bellum gerunt. Qua de causa Helvetii quoque reliquos Gallos virtute praecedunt, quod fere cotidianis proeliis cum Germanis contendunt, cum aut suis finibus eos prohibent aut ipsi in eorum finibus bellum gerunt.</em></p>
+                <button class="analyze-btn" onclick="analyzeText('Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur. Hi omnes lingua, institutis, legibus inter se differunt. Gallos ab Aquitanis Garumna flumen, a Belgis Matrona et Sequana dividit. Horum omnium fortissimi sunt Belgae, propterea quod a cultu atque humanitate provinciae longissime absunt, minimeque ad eos mercatores saepe commeant atque ea quae ad effeminandos animos pertinent important, proximique sunt Germanis, qui trans Rhenum incolunt, quibuscum continenter bellum gerunt. Qua de causa Helvetii quoque reliquos Gallos virtute praecedunt, quod fere cotidianis proeliis cum Germanis contendunt, cum aut suis finibus eos prohibent aut ipsi in eorum finibus bellum gerunt.')">
+                    {{ L.btn_analyze }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchLang(newLang) {
+            location.href = `?lang=${newLang}`;
+        }
+
+        function analyzeText(text) {
+            location.href = `/?lang={{ lang }}&latin_text=${text}`;
+        }
+    </script>
+</body>
+</html>

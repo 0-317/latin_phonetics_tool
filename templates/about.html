@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ L.about_title }}</title>
+    <style>
+        /* ========== 全局统一配色 + 所有要求 ========== */
+        :root {
+            --bg-page: #F9F2E8;
+            --bg-card: #FFFFFF;
+            --color-nav: #D4B98C;
+            --color-primary: #B8860B;
+            --color-hover: #F8F0E3;
+            --color-text: #4A3C28;
+            --color-title: #1A1200; /* 大字标题深色 */
+            --color-accent: #B50404; /* 低调暗红色点缀 */
+            --color-text-light: #8B7D6B;
+            --color-border: #E8DFD0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== 全局基础：中文典雅宋体 ========== */
+        body {
+            font-family: "Noto Serif SC", "SimSun", "Microsoft YaHei", serif;
+            font-size: 18px; /* 全局字体放大 */
+            font-weight: 500; /* 全局正文全加粗 */
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.8;
+        }
+
+        /* ========== 核心：英语/俄语专属瘦高字体 ========== */
+        :lang(en), :lang(ru) {
+            /* 瘦高字体栈：PT Serif(天生修长) → EB Garamond → Times New Roman */
+            font-family: "PT Serif", "EB Garamond", "Times New Roman", serif;
+            font-stretch: 92%; /* 额外压缩字宽，增强瘦高效果 */
+            letter-spacing: 0.3px; /* 轻微增加字间距，提升修长感 */
+        }
+
+        /* 导航栏 - 统一风格 */
+        .navbar {
+            background: var(--color-nav);
+            padding: 15px 24px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-bottom: 2px solid var(--color-accent); /* 暗红色低调衬线 */
+        }
+        .navbar a {
+            color: var(--color-title);
+            text-decoration: none;
+            margin-right: 28px;
+            font-weight: bold;
+            font-size: 17px; /* 中文导航默认大小 */
+            transition: all 0.2s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        /* ========== 核心修改：俄/英主菜单字体单独放大 ========== */
+        .navbar a:lang(en),
+        .navbar a:lang(ru) {
+            font-size: 19px; /* 俄英导航菜单加大2号，更醒目 */
+        }
+        .navbar a:hover {
+            background: var(--color-hover);
+            color: var(--color-primary);
+        }
+
+        /* 语言切换按钮 */
+        .lang-bar {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .lang-btn {
+            padding: 8px 16px;
+            margin-left: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--bg-card);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .lang-btn.active {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-accent); /* 暗红色点缀 */
+        }
+        .lang-btn:hover:not(.active) {
+            background: var(--color-hover);
+            border-color: var(--color-accent);
+        }
+
+        /* 内容卡片 */
+        .content-box {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-left: 3px solid var(--color-accent); /* 暗红色低调衬线 */
+        }
+
+        /* 大字标题：加粗 + #1A1200 颜色 */
+        h2 {
+            text-align: center;
+            font-size: 32px; /* 标题放大 */
+            font-weight: 900; /* 超粗 */
+            color: var(--color-title);
+            margin-bottom: 28px;
+            letter-spacing: 1px;
+            font-family: inherit;
+        }
+        h3 {
+            font-size: 24px; /* 副标题放大 */
+            margin: 24px 0 16px 0;
+            font-weight: 800; /* 加粗 */
+            color: var(--color-title);
+            border-bottom: 2px solid var(--color-accent);
+            padding-bottom: 8px;
+            display: inline-block;
+            font-family: inherit;
+        }
+
+        /* 技术标签 - 暗红色点缀 */
+        .tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 18px 0;
+        }
+        .tag {
+            background: var(--color-hover);
+            padding: 8px 14px;
+            border-radius: 4px;
+            color: var(--color-primary);
+            font-weight: bold;
+            border: 1px solid var(--color-accent); /* 暗红色衬线 */
+            font-family: inherit;
+        }
+
+        /* 列表样式 全加粗 */
+        ul {
+            margin-left: 28px;
+            margin-bottom: 15px;
+        }
+        li {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        p {
+            font-weight: 600; /* 段落全加粗 */
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        /* 算法功能列表 */
+        .algorithm-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .algorithm-feature {
+            background: var(--color-hover);
+            padding: 12px 16px;
+            border-radius: 6px;
+            border-left: 3px solid var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/?lang={{ lang }}">{{ L.nav_home }}</a>
+    <a href="/theory?lang={{ lang }}">{{ L.nav_theory }}</a>
+    <a href="/guide?lang={{ lang }}">{{ L.nav_guide }}</a>
+    <a href="/texts?lang={{ lang }}">{{ L.nav_texts }}</a>
+    <a href="/about?lang={{ lang }}">{{ L.nav_about }}</a>
+    <a href="/references?lang={{ lang }}">{{ L.nav_refs }}</a>
+</div>
+
+<div class="lang-bar">
+    <button class="lang-btn {{ 'active' if lang == 'ru' else '' }}" onclick="switchLang('ru')">Русский</button>
+    <button class="lang-btn {{ 'active' if lang == 'zh' else '' }}" onclick="switchLang('zh')">中文</button>
+    <button class="lang-btn {{ 'active' if lang == 'en' else '' }}" onclick="switchLang('en')">English</button>
+</div>
+
+<div class="content-box">
+    {% if lang == 'ru' %}
+    <h2>О проекте</h2>
+    
+    <h3>Общее описание</h3>
+    <p>Это инструмент для автоматизированной обработки латинских текстов, предназначенный для помощи пользователям (особенно студентам, изучающим латынь) в понимании и освоении правил деления латинских слов на слоги и постановки ударения. Это способствует правильному чтению и глубокому пониманию классических текстов.</p>
+    <p>Версия инструмента дополнена визуальными графиками, статистикой по ритмическим стопам, встроенной библиотекой классических латинских текстов и многоязычным интерфейсом (русский, китайский, английский). Добавлена подробная таблица анализа каждого слова с разбивкой на слоги, указанием открытости/закрытости, долготы/краткости и типа стопы.</p>
+
+    <h3>Цель исследования</h3>
+    <p>Разработать автоматизированный веб-инструмент для фонетико-ритмического анализа латинских текстов, полностью соответствующий классическим правилам латыни. Инструмент должен обеспечивать предобработку текста, анализ фонем, деление на слоги, маркировку многофакторных признаков, статистику ритмических стоп и визуализацию результатов, становясь эффективным помощником в преподавании и научных исследованиях.</p>
+
+    <h3>Основные задачи</h3>
+    <ul>
+        <li>Систематизировать ключевые фонетические и ритмические правила классической латыни, сформировав стандартизированную логику для алгоритмизации;</li>
+        <li>На основе языка программирования Python реализовать следующие функции: предобработку текста, распознавание фонем, деление на слоги, определение типа и длины слогов, маркировку ударения и статистику стоп;</li>
+        <li>Создать веб-архитектуру с многоязычным интерфейсом и интеграцией библиотеки классических латинских текстов;</li>
+        <li>Разработать модуль визуализации результатов с графическими диаграммами для представления статистических данных;</li>
+        <li>Провести тестирование инструмента на классических латинских текстах для проверки точности алгоритмов и оптимизации пользовательского опыта.</li>
+    </ul>
+
+    <h3>Технологический стек</h3>
+    <div class="tech">
+        <span class="tag">Python 3</span><span class="tag">Flask</span><span class="tag">Chart.js</span>
+        <span class="tag">MathJax</span><span class="tag">DataTables</span><span class="tag">HTML/CSS/JS</span>
+    </div>
+
+    <h3>Ядро алгоритма</h3>
+    <p>Инструмент реализует строгое следование классическим латинским правилам фонетики и метрики. Основные функции алгоритма:</p>
+    <div class="algorithm-features">
+        <div class="algorithm-feature">Деление слов на слоги по классическим правилам</div>
+        <div class="algorithm-feature">Определение открытых и закрытых слогов</div>
+        <div class="algorithm-feature">Распознавание долгих и коротких слогов</div>
+        <div class="algorithm-feature">Автоматическая маркировка ударения</div>
+        <div class="algorithm-feature">Статистический анализ ритмических стоп</div>
+        <div class="algorithm-feature">Обработка неразделимых согласных групп</div>
+    </div>
+
+    <h3>Ключевые возможности</h3>
+    <ul>
+        <li>Точный анализ по классическим правилам латыни</li>
+        <li>Поддержка трёх языков интерфейса: русский, китайский, английский</li>
+        <li>Визуализация данных в виде интерактивных диаграмм</li>
+        <li>Встроенная библиотека классических латинских текстов</li>
+        <li>Подробная таблица анализа каждого слова</li>
+    </ul>
+
+    {% elif lang == 'zh' %}
+    <h2>关于项目</h2>
+    
+    <h3>项目概述</h3>
+    <p>本工具是一个拉丁文本自动处理系统，旨在帮助用户（特别是学习拉丁语的学生）理解和掌握拉丁语单词的音节划分规则与重音标注方法，从而实现对古典文本的正确朗读与深入理解。</p>
+    <p>当前版本新增了可视化图表、音步统计分析、古典拉丁语文本库以及俄/中/英三语界面。工具能够生成每个单词的详细分析表格，包含音节划分、开/闭音节判断、长/短音标记以及音步类型等信息。</p>
+
+    <h3>研究目标</h3>
+    <p>开发一个完全符合古典拉丁语规则的拉丁文本语音韵律自动分析Web工具。该工具应提供文本预处理、音素分析、音节划分、多特征标记、音步统计以及结果可视化等功能，成为拉丁语教学与学术研究的高效辅助工具。</p>
+
+    <h3>核心任务</h3>
+    <ul>
+        <li>系统梳理古典拉丁语的核心语音与韵律规则，形成标准化的算法逻辑；</li>
+        <li>基于Python编程语言实现以下功能：文本预处理、音素识别、音节划分、音节类型与长度判断、重音标注以及音步统计；</li>
+        <li>构建支持多语言界面的Web架构，并集成古典拉丁语文本库；</li>
+        <li>开发结果可视化模块，通过图表展示统计数据；</li>
+        <li>在古典拉丁语文本上进行工具测试，验证算法准确性并优化用户体验。</li>
+    </ul>
+
+    <h3>技术栈</h3>
+    <div class="tech">
+        <span class="tag">Python 3</span><span class="tag">Flask</span><span class="tag">Chart.js</span>
+        <span class="tag">MathJax</span><span class="tag">DataTables</span><span class="tag">HTML/CSS/JS</span>
+    </div>
+
+    <h3>核心算法</h3>
+    <p>工具严格遵循古典拉丁语语音学和格律学规则实现。算法的主要功能包括：</p>
+    <div class="algorithm-features">
+        <div class="algorithm-feature">按古典规则进行单词音节划分</div>
+        <div class="algorithm-feature">自动判断开音节与闭音节</div>
+        <div class="algorithm-feature">准确识别长音节与短音节</div>
+        <div class="algorithm-feature">自动标注单词重音位置</div>
+        <div class="algorithm-feature">统计分析文本中的音步类型</div>
+        <div class="algorithm-feature">正确处理不可分割的辅音连缀</div>
+    </div>
+
+    <h3>主要功能</h3>
+    <ul>
+        <li>严格遵循古典拉丁语规则的精确分析</li>
+        <li>俄/中/英三语界面支持</li>
+        <li>交互式图表数据可视化</li>
+        <li>内置古典拉丁语文本库</li>
+        <li>每个单词的详细分析表格</li>
+    </ul>
+
+    {% else %}
+    <h2>About the Project</h2>
+    
+    <h3>General Description</h3>
+    <p>This is an automated Latin text processing tool designed to help users (especially students learning Latin) understand and master the rules of syllabification and accentuation in Latin words, enabling correct pronunciation and deep comprehension of classical texts.</p>
+    <p>This version is enhanced with visual charts, rhythmic foot statistics, an integrated library of classical Latin texts, and a trilingual interface (Russian, Chinese, English). It provides detailed analysis tables for each word, including syllable division, openness/closedness, length, and foot type.</p>
+
+    <h3>Research Goal</h3>
+    <p>To develop an automated web tool for phonetic and rhythmic analysis of Latin texts that fully complies with classical Latin rules. The tool should provide text preprocessing, phoneme analysis, syllabification, multi-feature marking, rhythmic foot statistics, and result visualization, becoming an effective assistant for teaching and academic research.</p>
+
+    <h3>Main Tasks</h3>
+    <ul>
+        <li>Systematize the key phonetic and rhythmic rules of classical Latin, forming standardized logic for algorithmization;</li>
+        <li>Implement the following functions using Python: text preprocessing, phoneme recognition, syllabification, syllable type and length determination, accent marking, and foot statistics;</li>
+        <li>Create a web architecture with a multilingual interface and integration of a classical Latin text library;</li>
+        <li>Develop a result visualization module with graphical charts for statistical data presentation;</li>
+        <li>Test the tool on classical Latin texts to verify algorithm accuracy and optimize user experience.</li>
+    </ul>
+
+    <h3>Technology Stack</h3>
+    <div class="tech">
+        <span class="tag">Python 3</span><span class="tag">Flask</span><span class="tag">Chart.js</span>
+        <span class="tag">MathJax</span><span class="tag">DataTables</span><span class="tag">HTML/CSS/JS</span>
+    </div>
+
+    <h3>Core Algorithm</h3>
+    <p>The tool strictly follows classical Latin phonetic and metric rules. The main functions of the algorithm include:</p>
+    <div class="algorithm-features">
+        <div class="algorithm-feature">Word syllabification according to classical rules</div>
+        <div class="algorithm-feature">Open and closed syllable identification</div>
+        <div class="algorithm-feature">Long and short syllable recognition</div>
+        <div class="algorithm-feature">Automatic accent marking</div>
+        <div class="algorithm-feature">Statistical analysis of rhythmic feet</div>
+        <div class="algorithm-feature">Proper handling of inseparable consonant clusters</div>
+    </div>
+
+    <h3>Key Features</h3>
+    <ul>
+        <li>Accurate analysis based on classical Latin rules</li>
+        <li>Trilingual interface support: Russian, Chinese, English</li>
+        <li>Interactive data visualization with charts</li>
+        <li>Built-in library of classical Latin texts</li>
+        <li>Detailed analysis table for each word</li>
+    </ul>
+    {% endif %}
+</div>
+
+<script>function switchLang(n){location.href=`?lang=${n}`;}</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ L.refs_title }}</title>
+    <style>
+        /* ========== 全局统一配色 + 所有定制要求 ========== */
+        :root {
+            --bg-page: #F9F2E8;
+            --bg-card: #FFFFFF;
+            --color-nav: #D4B98C;
+            --color-primary: #B8860B;
+            --color-hover: #F8F0E3;
+            --color-text: #4A3C28;
+            --color-title: #1A1200;
+            --color-accent: #B50404;
+            --color-text-light: #8B7D6B;
+            --color-border: #E8DFD0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== 全局基础：中文典雅宋体 ========== */
+        body {
+            font-family: "Noto Serif SC", "SimSun", "Microsoft YaHei", serif;
+            font-size: 18px;
+            font-weight: 500;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.8;
+        }
+
+        /* ========== 英语/俄语专属瘦高古典字体 ========== */
+        :lang(en), :lang(ru) {
+            font-family: "PT Serif", "EB Garamond", "Times New Roman", serif;
+            font-stretch: 92%;
+            letter-spacing: 0.3px;
+        }
+
+        /* 导航栏 - 全站统一 */
+        .navbar {
+            background: var(--color-nav);
+            padding: 15px 24px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-bottom: 2px solid var(--color-accent);
+        }
+        .navbar a {
+            color: var(--color-title);
+            text-decoration: none;
+            margin-right: 28px;
+            font-weight: bold;
+            font-size: 17px;
+            transition: all 0.2s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        /* 俄/英导航字体单独放大 */
+        .navbar a:lang(en),
+        .navbar a:lang(ru) {
+            font-size: 19px;
+        }
+        .navbar a:hover {
+            background: var(--color-hover);
+            color: var(--color-primary);
+        }
+
+        /* 语言切换按钮 - 全站统一 */
+        .lang-bar {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .lang-btn {
+            padding: 8px 16px;
+            margin-left: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--bg-card);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .lang-btn.active {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-accent);
+        }
+        .lang-btn:hover:not(.active) {
+            background: var(--color-hover);
+            border-color: var(--color-accent);
+        }
+
+        /* 内容容器 - 全站统一 */
+        .content-box {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-left: 3px solid var(--color-accent);
+        }
+
+        /* 标题样式 - 全站统一 */
+        h2 {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--color-title);
+            margin-bottom: 28px;
+            letter-spacing: 1px;
+            font-family: inherit;
+        }
+
+        /* 参考文献条目 - 风格统一 */
+        .reference-item {
+            margin: 18px 0;
+            padding-left: 20px;
+            border-left: 3px solid var(--color-accent);
+        }
+        .reference-item p {
+            font-weight: 600;
+            line-height: 1.8;
+        }
+        em {
+            font-style: italic;
+            color: var(--color-text);
+        }
+    </style>
+</head>
+<body>
+    <!-- 统一导航栏 -->
+    <div class="navbar">
+        <a href="/?lang={{ lang }}">{{ L.nav_home }}</a>
+        <a href="/theory?lang={{ lang }}">{{ L.nav_theory }}</a>
+        <a href="/guide?lang={{ lang }}">{{ L.nav_guide }}</a>
+        <a href="/texts?lang={{ lang }}">{{ L.nav_texts }}</a>
+        <a href="/about?lang={{ lang }}">{{ L.nav_about }}</a>
+        <a href="/references?lang={{ lang }}">{{ L.nav_refs }}</a>
+    </div>
+
+    <!-- 语言切换 -->
+    <div class="lang-bar">
+        <button class="lang-btn {{ 'active' if lang == 'ru' else '' }}" onclick="switchLang('ru')">Русский</button>
+        <button class="lang-btn {{ 'active' if lang == 'zh' else '' }}" onclick="switchLang('zh')">中文</button>
+        <button class="lang-btn {{ 'active' if lang == 'en' else '' }}" onclick="switchLang('en')">English</button>
+    </div>
+
+    <div class="content-box">
+        <h2>{{ L.refs_title }}</h2>
+
+        <div class="reference-item">
+            <p>Ярхо, В. Н. Латинский язык: учебник для студентов педагогических вузов / В. Н. Ярхо, В. И. Лобода. — Москва: Высшая школа, 1998. — 384 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Allen, W. S. <em>Accent and Rhythm: Prosodic Features of Latin and Greek</em> / W. S. Allen. — Cambridge: Cambridge University Press, 1973. — 320 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Duckworth, G. E. <em>The Meters of Roman Poetry</em> / G. E. Duckworth. — New York: Columbia University Press, 1969. — 416 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Halporn, J. W., Ostwald, M., Rosenmeyer, T. G. <em>The Meters of Greek and Latin Poetry</em> / J. W. Halporn, M. Ostwald, T. G. Rosenmeyer. — Indianapolis: Hackett Publishing, 1980. — 288 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Lehmann, C. <em>La structure de la syllabe latine</em> / C. Lehmann. — Tübingen: Max Niemeyer Verlag, 2005. — 216 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Raven, D. S. <em>Latin Metre: An Introduction</em> / D. S. Raven. — London: Faber and Faber, 1965. — 224 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Wilkinson, L. P. <em>Golden Latin Artistry</em> / L. P. Wilkinson. — Cambridge: Cambridge University Press, 1963. — 368 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Синь Дэлинь. <em>Основы латинского языка</em> / Синь Дэлинь. — Пекин: Издательство Пекинского университета, 2007. — 384 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Сяо Юань. <em>Грамматика латинского языка</em> / Сяо Юань. — Шанхай: Издательство Шанхайского иностранного языка, 2019. — 432 с.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>The Classical Language Toolkit (CLTK) [Электронный ресурс] / The CLTK Development Team. — Версия 0.1.120. — Режим доступа: https://cltk.org/</p>
+        </div>
+
+        <div class="reference-item">
+            <p>GurovaAnya. SyllableDivision [Электронный ресурс]. — Режим доступа: https://github.com/GurovaAnya/SyllableDivision</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Rahjael. Sillabatore [Электронный ресурс]. — Режим доступа: https://github.com/Rahjael/Sillabatore</p>
+        </div>
+
+        <div class="reference-item">
+            <p>sgharms. LatinSyllabator [Электронный ресурс]. — Режим доступа: https://github.com/sgharms/LatinSyllabator</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Allen, W. S. (1973). <em>Vox Latina: A Guide to the Pronunciation of Classical Latin</em>. Cambridge University Press.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Lehmann, W. P. (2005). <em>Historical Linguistics: An Introduction</em>. Routledge.</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Flask Documentation. https://flask.palletsprojects.com/</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Chart.js Documentation. https://www.chartjs.org/</p>
+        </div>
+
+        <div class="reference-item">
+            <p>MathJax Documentation. https://www.mathjax.org/</p>
+        </div>
+
+        <div class="reference-item">
+            <p>DataTables Documentation. https://datatables.net/</p>
+        </div>
+
+        <div class="reference-item">
+            <p>Project Gutenberg. https://www.gutenberg.org/files/227/227-h/227-h.htm</p>
+        </div>
+    </div>
+
+    <script>
+        function switchLang(newLang) {
+            location.href = `?lang=${newLang}`;
+        }
+    </script>
+</body>
+</html>

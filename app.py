@@ -7,9 +7,7 @@ from project.hexingongneng import process_latin_text, analyze_statistics
 # 初始化 Flask 应用
 app = Flask(__name__)
 
-# ====================== 多语言配置 ======================
-# 俄、中、英 三语言界面文本字典
-# 【关键呼应】这里的 L 会直接传给前端 index.html 中的 {{ L.xxx }} 使用
+# ====================== 多语言配置（完整版，新增导航/页面翻译） ======================
 LANGUAGE_MAP = {
     'ru': {
         'lang': 'ru',
@@ -37,18 +35,25 @@ LANGUAGE_MAP = {
         'long': 'Долгий',
         'short': 'Краткий',
         'no_results': 'Введите латинский текст и нажмите кнопку.',
-        # 音步名称（俄文）
         'foot_names': {
-            'SL': 'Ямб',
-            'LS': 'Трохей',
-            'LL': 'Спондей',
-            'SS': 'Пиррихий',
-            'SLL': 'Анапест',
-            'LLS': 'Дактиль',
-            'LSL': 'Амфибрах',
-            'LLL': 'Молосс',
-            'SSS': 'Трибрах'
-        }
+            'SL': 'Ямб', 'LS': 'Трохей', 'LL': 'Спондей', 'SS': 'Пиррихий',
+            'SLL': 'Анапест', 'LLS': 'Дактиль', 'LSL': 'Амфибрах',
+            'LLL': 'Молосс', 'SSS': 'Трибрах'
+        },
+        # 新增：导航栏翻译
+        'nav_home': 'Главная',
+        'nav_theory': 'Теория',
+        'nav_guide': 'Инструкция',
+        'nav_texts': 'Тексты',
+        'nav_about': 'О проекте',
+        'nav_refs': 'Литература',
+        # 新增：页面标题
+        'theory_title': 'Теоретические основы ритмики латыни',
+        'guide_title': 'Как пользоваться инструментом',
+        'texts_title': 'Классические латинские тексты',
+        'about_title': 'О проекте',
+        'refs_title': 'Список литературы',
+        'btn_analyze': 'Анализировать'
     },
     'zh': {
         'lang': 'zh',
@@ -76,18 +81,25 @@ LANGUAGE_MAP = {
         'long': '长音节',
         'short': '短音节',
         'no_results': '请输入文本并提交。',
-        # 音步名称（中文）
         'foot_names': {
-            'SL': '抑扬格',
-            'LS': '扬抑格',
-            'LL': '扬扬格',
-            'SS': '抑抑格',
-            'SLL': '抑抑扬格',
-            'LLS': '扬抑抑格',
-            'LSL': '扬抑扬格',
-            'LLL': '三长格',
-            'SSS': '三短格'
-        }
+            'SL': '抑扬格', 'LS': '扬抑格', 'LL': '扬扬格', 'SS': '抑抑格',
+            'SLL': '抑抑扬格', 'LLS': '扬抑抑格', 'LSL': '扬抑扬格',
+            'LLL': '三长格', 'SSS': '三短格'
+        },
+        # 新增：导航栏翻译
+        'nav_home': '首页',
+        'nav_theory': '理论基础',
+        'nav_guide': '使用教程',
+        'nav_texts': '经典文本',
+        'nav_about': '关于项目',
+        'nav_refs': '参考文献',
+        # 新增：页面标题
+        'theory_title': '拉丁语韵律理论基础',
+        'guide_title': '工具使用教程',
+        'texts_title': '拉丁语经典文本库',
+        'about_title': '关于项目',
+        'refs_title': '参考文献列表',
+        'btn_analyze': '开始分析'
     },
     'en': {
         'lang': 'en',
@@ -114,24 +126,29 @@ LANGUAGE_MAP = {
         'long': 'Long',
         'short': 'Short',
         'no_results': 'Enter text and submit.',
-        # 音步名称（英文）
         'foot_names': {
-            'SL': 'Iambus',
-            'LS': 'Trochee',
-            'LL': 'Spondee',
-            'SS': 'Pyrrhic',
-            'SLL': 'Anapest',
-            'LLS': 'Dactyl',
-            'LSL': 'Amphibrach',
-            'LLL': 'Molossus',
-            'SSS': 'Tribrach'
-        }
+            'SL': 'Iambus', 'LS': 'Trochee', 'LL': 'Spondee', 'SS': 'Pyrrhic',
+            'SLL': 'Anapest', 'LLS': 'Dactyl', 'LSL': 'Amphibrach',
+            'LLL': 'Molossus', 'SSS': 'Tribrach'
+        },
+        # 新增：导航栏翻译
+        'nav_home': 'Home',
+        'nav_theory': 'Theory',
+        'nav_guide': 'Guide',
+        'nav_texts': 'Texts',
+        'nav_about': 'About',
+        'nav_refs': 'References',
+        # 新增：页面标题
+        'theory_title': 'Latin Prosody Theory',
+        'guide_title': 'User Guide',
+        'texts_title': 'Classic Latin Texts',
+        'about_title': 'About the Project',
+        'refs_title': 'References',
+        'btn_analyze': 'Analyze'
     }
 }
 
-# ====================== 经典文本库 ======================
-# 内置5段经典拉丁语，前端一键加载
-# 【关键呼应】传给前端 index.html 循环渲染按钮
+# ====================== 经典文本库（无修改） ======================
 CLASSICTEXTS = [
     {
         "name_ru": "1. Энеида (Вергилий) — начало",
@@ -165,33 +182,31 @@ CLASSICTEXTS = [
     }
 ]
 
-# ====================== 主路由（首页） ======================
+# ====================== 核心路由（原有功能100%保留） ======================
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # 1. 获取语言参数（默认俄语）
     lang = request.args.get('lang', 'ru')
     if lang not in LANGUAGE_MAP:
         lang = 'ru'
-    L = LANGUAGE_MAP[lang]  # 当前语言包
+    L = LANGUAGE_MAP[lang]
 
-    # 2. 初始化结果变量
-    latin_result = []    # 音节划分原始结果
-    stats_data = None    # 图表+表格统计数据
+    # 初始化内容
+    input_content = ""
+    latin_result = []
+    stats_data = None
 
-    # 3. 用户提交文本 → 开始分析
+    # 拿到用户已输入的内容（POST 或 GET 里都保留）
     if request.method == 'POST':
-        # 获取用户输入
         input_content = request.form.get('latin_text', '').strip()
-        
-        # 【调用核心算法】音节划分、开闭、长短、重音
+    else:
+        input_content = request.args.get('latin_text', '').strip()
+
+    # 分析
+    if input_content:
         latin_result = process_latin_text(input_content)
-        
-        # 【调用统计函数】生成图表数据
         if latin_result:
             stats_data = analyze_statistics(latin_result)
 
-            # ====================== 表格数据拼接 ======================
-            # 把开闭、长短、音步名称 转为当前语言
             if stats_data and 'feet_details' in stats_data:
                 for item in stats_data['feet_details']:
                     for wd in latin_result:
@@ -200,7 +215,6 @@ def index():
                             if len(sp) == 2:
                                 s1, s2 = sp[0], sp[1]
                                 s1t = s2t = s1l = s2l = ''
-                                # 匹配音节类型
                                 for syl in wd['syllables']:
                                     if syl['syllable_str'] == s1:
                                         s1t = syl['type']
@@ -209,7 +223,6 @@ def index():
                                         s2t = syl['type']
                                         s2l = syl['length']
 
-                                # 类型翻译函数
                                 def t(v):
                                     if v == 'открытый': return L['open']
                                     if v == 'закрытый': return L['closed']
@@ -219,22 +232,62 @@ def index():
                                     if v == 'короткий': return L['short']
                                     return ''
 
-                                # 拼接前端表格显示内容
                                 item['oc'] = f"{s1} ({t(s1t)}) + {s2} ({t(s2t)})"
                                 item['ls'] = f"{s1} ({l(s1l)}) + {s2} ({l(s2l)})"
                                 item['name_local'] = L['foot_names'].get(item['pattern'], 'Неизвестно')
                             break
 
-    # 4. 渲染前端页面，把所有数据传给 index.html
     return render_template(
         'index.html', 
-        result=latin_result,    # 单词音节结果
-        stats=stats_data,       # 统计图表数据
-        lang=lang,              # 当前语言
-        L=L,                    # 多语言文本
-        classic_texts=CLASSICTEXTS  # 经典文本库
+        result=latin_result,
+        stats=stats_data,
+        lang=lang,
+        L=L,
+        classic_texts=CLASSICTEXTS,
+        input_content=input_content
     )
 
-# 启动应用
+# ====================== 新增：5个页面路由（6页网站完成） ======================
+# 1. 理论基础页
+@app.route('/theory')
+def theory():
+    lang = request.args.get('lang', 'ru')
+    lang = lang if lang in LANGUAGE_MAP else 'ru'
+    L = LANGUAGE_MAP[lang]
+    return render_template('theory.html', lang=lang, L=L)
+
+# 2. 使用教程页
+@app.route('/guide')
+def guide():
+    lang = request.args.get('lang', 'ru')
+    lang = lang if lang in LANGUAGE_MAP else 'ru'
+    L = LANGUAGE_MAP[lang]
+    return render_template('guide.html', lang=lang, L=L)
+
+# 3. 经典文本库页
+@app.route('/texts')
+def texts():
+    lang = request.args.get('lang', 'ru')
+    lang = lang if lang in LANGUAGE_MAP else 'ru'
+    L = LANGUAGE_MAP[lang]
+    return render_template('texts.html', lang=lang, L=L, classic_texts=CLASSICTEXTS)
+
+# 4. 关于项目页
+@app.route('/about')
+def about():
+    lang = request.args.get('lang', 'ru')
+    lang = lang if lang in LANGUAGE_MAP else 'ru'
+    L = LANGUAGE_MAP[lang]
+    return render_template('about.html', lang=lang, L=L)
+
+# 5. 参考文献页
+@app.route('/references')
+def references():
+    lang = request.args.get('lang', 'ru')
+    lang = lang if lang in LANGUAGE_MAP else 'ru'
+    L = LANGUAGE_MAP[lang]
+    return render_template('references.html', lang=lang, L=L)
+
+# ====================== 启动（DEBUG模式已开启） ======================
 if __name__ == '__main__':
     app.run(debug=True)

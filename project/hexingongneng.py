@@ -9,14 +9,20 @@ CONSONANT_GROUPS = [
     "sp", "st", "sc", "ch", "ph", "th", "qu"
 ]
 
-# 长元音 → 普通元音映射（用于规范化判断）
+# 长元音/短元音 → 普通元音映射（用于规范化判断）
+# 同时支持长音符(macron)和短音符(breve)，统一转换为无变音符号的普通元音
 LONG_MARK_MAP = {
+    # 长音符 (macron)
     'ā': 'a', 'ē': 'e', 'ī': 'i', 'ō': 'o', 'ū': 'u', 'ȳ': 'y',
-    'Ā': 'A', 'Ē': 'E', 'Ī': 'I', 'Ō': 'O', 'Ū': 'U', 'Ȳ': 'Y'
+    'Ā': 'A', 'Ē': 'E', 'Ī': 'I', 'Ō': 'O', 'Ū': 'U', 'Ȳ': 'Y',
+    # 短音符 (breve)
+    'ă': 'a', 'ĕ': 'e', 'ĭ': 'i', 'ŏ': 'o', 'ŭ': 'u', 'y̆': 'y',
+    'Ă': 'A', 'Ĕ': 'E', 'Ĭ': 'I', 'Ŏ': 'O', 'Ŭ': 'U', 'Y̆': 'Y'
 }
 
 # 普通元音 → 长元音映射（用于标重音）
-SHORT_TO_LONG_MAP = {v: k for k, v in LONG_MARK_MAP.items()}
+# 只保留长元音映射，忽略短音符
+SHORT_TO_LONG_MAP = {v: k for k, v in LONG_MARK_MAP.items() if len(k) == 1 and k in ['ā', 'ē', 'ī', 'ō', 'ū', 'ȳ']}
 
 # 拉丁语双元音（不可拆分，整体为一个元音）
 DIPHTHONGS = ['ae', 'oe', 'au', 'eu', 'ei', 'ui']
@@ -27,17 +33,21 @@ LONG_VOWELS = ['ā', 'ē', 'ī', 'ō', 'ū', 'ȳ']
 VOWELS = SHORT_VOWELS + LONG_VOWELS
 
 # 拉丁语辅音字母
+# 注：j和w是现代转写中使用的字母，古典拉丁语中无独立字母
+# j对应辅音i（半元音/j/），w对应辅音v（半元音/w/）
 CONSONANTS = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p',
         'q', 'r', 's', 't', 'v', 'w', 'x', 'z']
 
 # 塞音+流音组合（位置在元音之间时，不强制前面音节变长）
+# 这是位置长音规则中最重要的例外
 STOP_LIQUID = ['pr', 'tr', 'cr', 'br', 'dr', 'fr', 'gr', 'pl', 'cl', 'bl', 'fl', 'gl']
 
 # ====================== 音素分析 ======================
 def sounder(word: str) -> list:
     """
     音素标记函数：把单词拆分成【元音/辅音】单元
-    处理：双元音、辅音连缀、q-u 规则、i 半元音现象
+    严格遵循古典拉丁语半元音判定规则（优先级从高到低）
+    处理：双元音、辅音连缀、q-u 规则、i/j/u/v 半元音现象
     返回：列表，每个元素 = [类型(v/c), 字符]
     """
     if not word:
@@ -49,52 +59,125 @@ def sounder(word: str) -> list:
 
     while i < word_len:
         char = word[i]
-        # 长元音 → 标记为元音 v
-        if char in LONG_VOWELS:
+        char_lower = char.lower()
+        
+        # ==============================================
+        # 半元音判定最高优先级规则（永远成立）
+        # ==============================================
+        
+        # 规则1：现代转写中的j永远是半元音（辅音）
+        if char_lower == 'j':
+            chars.append(['c', char])
+            i += 1
+            continue
+        
+        # 规则2：现代转写中的v永远是半元音（辅音）
+        if char_lower == 'v':
+            chars.append(['c', char])
+            i += 1
+            continue
+        
+        # 规则3：长元音ī永远是元音，无论位置如何
+        if char == 'ī' or char == 'Ī':
             chars.append(['v', char])
             i += 1
-        # 短元音 → 标记为元音 v
-        elif char in SHORT_VOWELS:
+            continue
+        
+        # 规则4：长元音ū永远是元音，无论位置如何
+        if char == 'ū' or char == 'Ū':
             chars.append(['v', char])
             i += 1
-        # 特殊：q 后面的 u 视为辅音（qu 整体为辅音组）
-        elif char == 'u':
-            if i > 0 and word[i-1] == 'q':
-                chars.append(['c', char])
+            continue
+        
+        # ==============================================
+        # 普通元音/辅音处理
+        # ==============================================
+        
+        # 处理所有其他元音（a/e/o/y和短元音i/u）
+        if char in VOWELS:
+            # 单独处理短元音i的半元音情况
+            if char_lower == 'i':
+                if word_len == 1:
+                    # 单音节词永远是元音
+                    chars.append(['v', char])
+                    i += 1
+                    continue
+                elif i == 0:
+                    # 规则5：词首短元音i，后面紧跟元音→半元音（辅音）
+                    if i + 1 < word_len and word[i+1] in VOWELS:
+                        chars.append(['c', char])
+                    else:
+                        chars.append(['v', char])
+                    i += 1
+                    continue
+                elif i == word_len - 1:
+                    # 规则6：词尾i永远是元音
+                    chars.append(['v', char])
+                    i += 1
+                    continue
+                else:
+                    # 规则7：词中短元音i，前后都是元音→半元音（辅音）
+                    # 关键例外：如果i后面跟着a或e，则i是元音（解决-iae/-iei结尾问题）
+                    prev_is_vowel = word[i-1] in VOWELS
+                    next_is_vowel = word[i+1] in VOWELS
+                    next_char = word[i+1].lower()
+
+                    if prev_is_vowel and next_is_vowel and next_char not in ['a', 'e']:
+                        chars.append(['c', char])
+                    else:
+                        chars.append(['v', char])
+                    i += 1
+                    continue
+            
+            # 单独处理短元音u的半元音情况
+            elif char_lower == 'u':
+                if i > 0 and word[i-1].lower() == 'q':
+                    # 规则8：qu组合中的u永远是半元音（辅音）
+                    chars.append(['c', char])
+                    i += 1
+                    continue
+                elif word_len == 1:
+                    # 单音节词永远是元音
+                    chars.append(['v', char])
+                    i += 1
+                    continue
+                elif i == word_len - 1:
+                    # 规则9：词尾u永远是元音
+                    chars.append(['v', char])
+                    i += 1
+                    continue
+                else:
+                    # 基础工具简化：词首和词中的u永远视为元音
+                    # 现代转写中会用v明确表示半元音/w/
+                    chars.append(['v', char])
+                    i += 1
+                    continue
+            
+            # 其他元音（a/e/o/y）直接标记为元音
             else:
-                chars.append(['v', char])
-            i += 1
-        # 特殊：i 介于两元音之间时作半元音（辅音）
-        elif char == 'i':
-            if word_len == 1:
                 chars.append(['v', char])
                 i += 1
                 continue
-            if i == 0:
-                chars.append(['v', char] if word[1] not in VOWELS else ['c', char])
-                i += 1
-            elif i == word_len - 1:
-                chars.append(['v', char])
-                i += 1
-            else:
-                prev_is_vowel = word[i-1] in VOWELS
-                next_is_vowel = word[i+1] in VOWELS
-                chars.append(['c', char] if (prev_is_vowel and next_is_vowel) else ['v', char])
-                i += 1
-        # 辅音：优先匹配双辅音组，否则单个辅音
-        else:
-            matched = False
-            if i + 1 < word_len:
-                two_char = word[i:i+2].lower()
-                if two_char in CONSONANT_GROUPS:
-                    chars.append(['c', word[i:i+2]])
-                    i += 2
-                    matched = True
-            if not matched:
-                chars.append(['c', char])
-                i += 1
+        
+        # ==============================================
+        # 辅音处理
+        # ==============================================
+        
+        # 优先匹配双辅音组，否则单个辅音
+        matched = False
+        if i + 1 < word_len:
+            two_char = word[i:i+2].lower()
+            if two_char in CONSONANT_GROUPS:
+                chars.append(['c', word[i:i+2]])
+                i += 2
+                matched = True
+        if not matched:
+            chars.append(['c', char])
+            i += 1
 
-    # 合并双元音（两个相邻元音如果是 diphthong，合并为一个元音）
+    # ==============================================
+    # 双元音合并（两个相邻元音如果是合法双元音，合并为一个元音单元）
+    # ==============================================
     pairs_to_merge = []
     for j in range(len(chars) - 1):
         curr_type, curr_char = chars[j]
@@ -112,7 +195,6 @@ def sounder(word: str) -> list:
             del chars[j+1]
 
     return chars
-
 # ====================== 音节划分核心 ======================
 def syllabify_word(word_sounds: list) -> list:
     """
@@ -383,7 +465,7 @@ def process_latin_text(input_text: str) -> list:
 
     return result_list
 
-# ====================== 统计与图表数据 ======================
+# ====================== 统计与图表数据（修复多音节+兼容前端所有字段） ======================
 def analyze_statistics(processed_words):
     """
     统计功能（用于前端图表展示）
@@ -416,7 +498,10 @@ def analyze_statistics(processed_words):
         word_text = word_data['word']
         syllables = word_data['syllables']
         
-        # 统计开闭、长短
+        # 🔥 修复1：生成【完整音节划分】（所有音节用-连接，不截断）
+        full_syllable_str = "-".join([syl['syllable_str'] for syl in syllables])
+        
+        # 统计开闭、长短（无修改）
         for syl in syllables:
             if syl.get('type') == 'открытый':
                 open_count += 1
@@ -428,17 +513,13 @@ def analyze_statistics(processed_words):
             elif syl.get('length') == 'короткий':
                 short_count += 1
         
-        # 两两组合，识别音步
-        max_idx = len(syllables) - (len(syllables) % 2)
-        for i in range(0, max_idx, 2):
+        # 🔥 修复2：音步仍两两分组，音节划分完整显示
+        for i in range(0, len(syllables) - 1, 2):
             if i + 1 >= len(syllables):
                 break
                 
             s1 = syllables[i]
             s2 = syllables[i+1]
-            
-            s1_text = s1.get('syllable_str', '')
-            s2_text = s2.get('syllable_str', '')
             
             len1 = 'L' if s1.get('length') == 'длинный' else 'S'
             len2 = 'L' if s2.get('length') == 'длинный' else 'S'
@@ -446,14 +527,17 @@ def analyze_statistics(processed_words):
             
             feet_counts[foot_key] = feet_counts.get(foot_key, 0) + 1
             
-            len1_display = "длинный" if len1 == 'L' else "короткий"
-            len2_display = "длинный" if len2 == 'L' else "короткий"
+            # 🔥 核心修复：补全前端需要的 ALL 字段，解决所有UndefinedError
+            foot_name = foot_names_map.get(foot_key, 'Неизвестно')
             feet_details.append({
                 'word': word_text,
-                'syllable_pair': f"{s1_text}-{s2_text}",
+                'syllable_pair': full_syllable_str,
                 'pattern': foot_key,
-                'name': foot_names_map.get(foot_key, 'Неизвестно'),
-                'analysis': f"1-й слог '{s1_text}' ({len1_display}) + 2-й слог '{s2_text}' ({len2_display})"
+                'name': foot_name,
+                'name_local': foot_name,  # ✅ 前端需要name_local，直接赋值
+                'oc': s1['type'] + ' + ' + s2['type'],  # ✅ 前端需要oc（开闭音节）
+                'ls': s1['length'] + ' + ' + s2['length'],  # ✅ 前端需要ls（音长）
+                'analysis': f"1-й слог '{s1['syllable_str']}' ({s1['length']}) + 2-й слог '{s2['syllable_str']}' ({s2['length']})"
             })
 
     total_words = len(processed_words)
@@ -480,7 +564,6 @@ def analyze_statistics(processed_words):
         'feet_details': feet_details,
         'feet_names_map': foot_names_map
     }
-
 # ====================== 测试 ======================
 if __name__ == "__main__":
     test_text = "arma virumque cano aere perennius"

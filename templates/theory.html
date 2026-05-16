@@ -1,0 +1,306 @@
+﻿<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ L.theory_title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* ========== 全局统一配色 + 所有要求 ========== */
+        :root {
+            --bg-page: #F9F2E8;
+            --bg-card: #FFFFFF;
+            --color-nav: #D4B98C;
+            --color-primary: #B8860B;
+            --color-hover: #F8F0E3;
+            --color-text: #4A3C28;
+            --color-title: #1A1200; /* 大字标题深色 */
+            --color-accent: #B50404; /* 低调暗红色点缀 */
+            --color-text-light: #8B7D6B;
+            --color-border: #E8DFD0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== 全局基础：中文典雅宋体 ========== */
+        body {
+            font-family: "Noto Serif SC", "SimSun", "Microsoft YaHei", serif;
+            font-size: 18px; /* 全局字体放大 */
+            font-weight: 500; /* 全局正文全加粗 */
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.8;
+        }
+
+        /* ========== 核心：英语/俄语专属瘦高字体 ========== */
+        :lang(en), :lang(ru) {
+            /* 瘦高字体栈：PT Serif(天生修长) → EB Garamond → Times New Roman */
+            font-family: "PT Serif", "EB Garamond", "Times New Roman", serif;
+            font-stretch: 92%; /* 额外压缩字宽，增强瘦高效果 */
+            letter-spacing: 0.3px; /* 轻微增加字间距，提升修长感 */
+        }
+
+        /* 导航栏 - 统一风格 */
+        .navbar {
+            background: var(--color-nav);
+            padding: 15px 24px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-bottom: 2px solid var(--color-accent); /* 暗红色低调衬线 */
+        }
+        .navbar a {
+            color: var(--color-title);
+            text-decoration: none;
+            margin-right: 28px;
+            font-weight: bold;
+            font-size: 17px; /* 中文导航默认大小 */
+            transition: all 0.2s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        /* ========== 核心修改：俄/英主菜单字体单独放大 ========== */
+        .navbar a:lang(en),
+        .navbar a:lang(ru) {
+            font-size: 19px; /* 俄英导航菜单加大2号，更醒目 */
+        }
+        .navbar a:hover {
+            background: var(--color-hover);
+            color: var(--color-primary);
+        }
+
+        /* 语言切换按钮 */
+        .lang-bar {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .lang-btn {
+            padding: 8px 16px;
+            margin-left: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--bg-card);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .lang-btn.active {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-accent); /* 暗红色点缀 */
+        }
+        .lang-btn:hover:not(.active) {
+            background: var(--color-hover);
+            border-color: var(--color-accent);
+        }
+
+        /* 内容卡片 */
+        .content-box {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-left: 3px solid var(--color-accent); /* 暗红色低调衬线 */
+        }
+
+        /* 大字标题：加粗 + #1A1200 颜色 */
+        h2 {
+            text-align: center;
+            font-size: 32px; /* 标题放大 */
+            font-weight: 900; /* 超粗 */
+            color: var(--color-title);
+            margin-bottom: 28px;
+            letter-spacing: 1px;
+            font-family: inherit;
+        }
+        h3 {
+            font-size: 24px; /* 副标题放大 */
+            margin: 20px 0;
+            font-weight: 800; /* 加粗 */
+            color: var(--color-title);
+            border-bottom: 2px solid var(--color-accent);
+            padding-bottom: 8px;
+            display: inline-block;
+            font-family: inherit;
+        }
+
+        /* 技术标签 - 暗红色点缀 */
+        .tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 18px 0;
+        }
+        .tag {
+            background: var(--color-hover);
+            padding: 8px 14px;
+            border-radius: 4px;
+            color: var(--color-primary);
+            font-weight: bold;
+            border: 1px solid var(--color-accent); /* 暗红色衬线 */
+            font-family: inherit;
+        }
+
+        /* 公式块 - 统一风格 */
+        .formula {
+            background: var(--color-hover);
+            padding: 16px 20px;
+            border-radius: 6px;
+            margin: 12px 0;
+            border-left: 2px solid var(--color-accent);
+            font-family: inherit;
+        }
+        .formula p {
+            margin: 6px 0;
+            font-weight: 600;
+        }
+
+        /* 列表样式 全加粗 */
+        ul {
+            margin-left: 28px;
+            margin-bottom: 15px;
+        }
+        li {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        p {
+            font-weight: 600; /* 段落全加粗 */
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ 正确导航栏：只显示当前语言 -->
+<div class="navbar">
+    <a href="/?lang={{ lang }}">{{ L.nav_home }}</a>
+    <a href="/theory?lang={{ lang }}">{{ L.nav_theory }}</a>
+    <a href="/guide?lang={{ lang }}">{{ L.nav_guide }}</a>
+    <a href="/texts?lang={{ lang }}">{{ L.nav_texts }}</a>
+    <a href="/about?lang={{ lang }}">{{ L.nav_about }}</a>
+    <a href="/references?lang={{ lang }}">{{ L.nav_refs }}</a>
+</div>
+
+<div class="lang-bar">
+    <button class="lang-btn {{ 'active' if lang == 'ru' else '' }}" onclick="switchLang('ru')">Русский</button>
+    <button class="lang-btn {{ 'active' if lang == 'zh' else '' }}" onclick="switchLang('zh')">中文</button>
+    <button class="lang-btn {{ 'active' if lang == 'en' else '' }}" onclick="switchLang('en')">English</button>
+</div>
+
+<div class="content-box">
+    {% if lang == 'ru' %}
+    <h2>Теоретические основы латинской метрики</h2>
+    
+    <h3>1. Обозначения</h3>
+    <div class="formula">
+        <p>\(S\) – короткий слог</p>
+        <p>\(L\) – длинный слог</p>
+        <p>\(C\) – согласный</p>
+        <p>\(V\) – гласный</p>
+    </div>
+
+    <h3>2. Структура слога</h3>
+    <div class="formula">
+        <p>Слог = \((C^*)V(V)(C^*)\)</p>
+        <p>Открытый слог: заканчивается на гласный</p>
+        <p>Закрытый слог: заканчивается на согласный</p>
+    </div>
+
+    <h3>3. Правило долготы</h3>
+    <div class="formula">
+        <p>Природная долгота: дифтонги ae, oe, au, eu</p>
+        <p>Позиционная долгота: \(V + CC \Rightarrow \overline{V}\)</p>
+    </div>
+
+    <h3>4. Основные стопы</h3>
+    <div class="formula">
+        <p>Ямб: SL</p>
+        <p>Трохей: LS</p>
+        <p>Спондей: LL</p>
+        <p>Пиррихий: SS</p>
+        <p>Дактиль: LSS</p>
+        <p>Анапест: SSL</p>
+    </div>
+
+    {% elif lang == 'zh' %}
+    <h2>拉丁语韵律理论基础</h2>
+    
+    <h3>1. 符号定义</h3>
+    <div class="formula">
+        <p>\(S\) = 短音节</p>
+        <p>\(L\) = 长音节</p>
+        <p>\(C\) = 辅音</p>
+        <p>\(V\) = 元音</p>
+    </div>
+
+    <h3>2. 音节结构</h3>
+    <div class="formula">
+        <p>音节结构：\((C^*)V(V)(C^*)\)</p>
+        <p>开音节：以元音结尾</p>
+        <p>闭音节：以辅音结尾</p>
+    </div>
+
+    <h3>3. 音长规则</h3>
+    <div class="formula">
+        <p>自然长音：双元音 ae, oe, au, eu</p>
+        <p>位置长音：\(V + CC \Rightarrow \overline{V}\)</p>
+    </div>
+
+    <h3>4. 核心音步</h3>
+    <div class="formula">
+        <p>抑扬格：SL</p>
+        <p>扬抑格：LS</p>
+        <p>扬扬格：LL</p>
+        <p>抑抑格：SS</p>
+        <p>扬抑抑格：LSS</p>
+        <p>抑抑扬格：SSL</p>
+    </div>
+
+    {% else %}
+    <h2>Latin Prosody & Metrics Theory</h2>
+    
+    <h3>1. Notation</h3>
+    <div class="formula">
+        <p>\(S\) = short syllable</p>
+        <p>\(L\) = long syllable</p>
+        <p>\(C\) = consonant</p>
+        <p>\(V\) = vowel</p>
+    </div>
+
+    <h3>2. Syllable Structure</h3>
+    <div class="formula">
+        <p>Syllable = \((C^*)V(V)(C^*)\)</p>
+        <p>Open syllable: ends with vowel</p>
+        <p>Closed syllable: ends with consonant</p>
+    </div>
+
+    <h3>3. Length Rules</h3>
+    <div class="formula">
+        <p>Natural length: diphthongs ae, oe, au, eu</p>
+        <p>Positional length: \(V + CC \Rightarrow \overline{V}\)</p>
+    </div>
+
+    <h3>4. Main Metrical Feet</h3>
+    <div class="formula">
+        <p>Iambus: SL</p>
+        <p>Trochee: LS</p>
+        <p>Spondee: LL</p>
+        <p>Pyrrhic: SS</p>
+        <p>Dactyl: LSS</p>
+        <p>Anapest: SSL</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>function switchLang(n){location.href=`?lang=${n}`;}</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ L.guide_title }}</title>
+    <style>
+        /* ========== 全站统一配色变量 ========== */
+        :root {
+            --bg-page: #F9F2E8;
+            --bg-card: #FFFFFF;
+            --color-nav: #D4B98C;
+            --color-primary: #B8860B;
+            --color-hover: #F8F0E3;
+            --color-text: #4A3C28;
+            --color-title: #1A1200;
+            --color-accent: #B50404;
+            --color-text-light: #8B7D6B;
+            --color-border: #E8DFD0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 中文典雅宋体 */
+        body {
+            font-family: "Noto Serif SC", "SimSun", "Microsoft YaHei", serif;
+            font-size: 18px;
+            font-weight: 500;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--bg-page);
+            color: var(--color-text);
+            line-height: 1.8;
+        }
+
+        /* 英/俄 瘦高古典字体 */
+        :lang(en), :lang(ru) {
+            font-family: "PT Serif", "EB Garamond", "Times New Roman", serif;
+            font-stretch: 92%;
+            letter-spacing: 0.3px;
+        }
+
+        /* 导航栏 - 全站统一 */
+        .navbar {
+            background: var(--color-nav);
+            padding: 15px 24px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-bottom: 2px solid var(--color-accent);
+        }
+        .navbar a {
+            color: var(--color-title);
+            text-decoration: none;
+            margin-right: 28px;
+            font-weight: bold;
+            font-size: 17px;
+            transition: all 0.2s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        /* 英/俄导航字体单独放大 */
+        .navbar a:lang(en),
+        .navbar a:lang(ru) {
+            font-size: 19px;
+        }
+        .navbar a:hover {
+            background: var(--color-hover);
+            color: var(--color-primary);
+        }
+
+        /* 语言切换按钮 - 全站统一 */
+        .lang-bar {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .lang-btn {
+            padding: 8px 16px;
+            margin-left: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--bg-card);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .lang-btn.active {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-accent);
+        }
+        .lang-btn:hover:not(.active) {
+            background: var(--color-hover);
+            border-color: var(--color-accent);
+        }
+
+        /* 内容容器 - 全站统一 */
+        .content-box {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-left: 3px solid var(--color-accent);
+        }
+
+        /* 标题样式 - 全站统一 */
+        h2 {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--color-title);
+            margin-bottom: 28px;
+            letter-spacing: 1px;
+            font-family: inherit;
+        }
+        h3 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--color-title);
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+
+        /* 步骤卡片 - 风格统一 */
+        .step {
+            margin: 18px 0;
+            padding: 18px 22px;
+            border-left: 3px solid var(--color-accent);
+            background: var(--color-hover);
+            border-radius: 0 6px 6px 0;
+        }
+        .step p {
+            font-weight: 600;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+<!-- 统一导航栏 -->
+<div class="navbar">
+    <a href="/?lang={{ lang }}">{{ L.nav_home }}</a>
+    <a href="/theory?lang={{ lang }}">{{ L.nav_theory }}</a>
+    <a href="/guide?lang={{ lang }}">{{ L.nav_guide }}</a>
+    <a href="/texts?lang={{ lang }}">{{ L.nav_texts }}</a>
+    <a href="/about?lang={{ lang }}">{{ L.nav_about }}</a>
+    <a href="/references?lang={{ lang }}">{{ L.nav_refs }}</a>
+</div>
+
+<div class="lang-bar">
+    <button class="lang-btn {{ 'active' if lang == 'ru' else '' }}" onclick="switchLang('ru')">Русский</button>
+    <button class="lang-btn {{ 'active' if lang == 'zh' else '' }}" onclick="switchLang('zh')">中文</button>
+    <button class="lang-btn {{ 'active' if lang == 'en' else '' }}" onclick="switchLang('en')">English</button>
+</div>
+
+<div class="content-box">
+    {% if lang == 'ru' %}
+    <h2>Как пользоваться инструментом</h2>
+    <div class="step"><h3>Шаг 1: Введите латинский текст</h3><p>На главной странице введите текст или выберите готовый из библиотеки классических текстов.</p></div>
+    <div class="step"><h3>Шаг 2: Запустите анализ</h3><p>Нажмите кнопку «Разделить слоги и проанализировать» для запуска обработки.</p></div>
+    <div class="step"><h3>Шаг 3: Посмотрите статистику</h3><p>Изучите наглядные диаграммы: открытые/закрытые слоги, долгие/короткие слоги, пропорция стоп.</p></div>
+    <div class="step"><h3>Шаг 4: Работа с таблицей</h3><p>Используйте интерактивную таблицу для сортировки, поиска и фильтрации данных.</p></div>
+    {% elif lang == 'zh' %}
+    <h2>工具使用教程</h2>
+    <div class="step"><h3>步骤1：输入拉丁文本</h3><p>在首页输入拉丁语，或从经典文本库选择预设内容。</p></div>
+    <div class="step"><h3>步骤2：启动分析</h3><p>点击「分割音节并分析」按钮开始处理。</p></div>
+    <div class="step"><h3>步骤3：查看统计图表</h3><p>查看开闭音节、长短音、音步分布的可视化图表。</p></div>
+    <div class="step"><h3>步骤4：使用分析表格</h3><p>表格支持排序、搜索、分页，可快速筛选数据。</p></div>
+    {% else %}
+    <h2>User Guide</h2>
+    <div class="step"><h3>Step 1: Enter Latin Text</h3><p>On the homepage, input text or select a classic text from the library.</p></div>
+    <div class="step"><h3>Step 2: Run Analysis</h3><p>Click the button to analyze syllables and metrics.</p></div>
+    <div class="step"><h3>Step 3: View Statistics</h3><p>Check charts for open/closed syllables, long/short vowels, metrical feet.</p></div>
+    <div class="step"><h3>Step 4: Use Data Table</h3><p>Sort, search, and filter detailed analysis results.</p></div>
+    {% endif %}
+</div>
+
+<script>function switchLang(n){location.href=`?lang=${n}`;}</script>
+</body>
+</html>
