@@ -3,19 +3,20 @@
 #新增：散文/诗歌双模式切换，诗歌支持省音、连续音流、通用音步划分
 import string
 
-# ====================== 全局常量定义（你的原文，一字未改） ======================
-#不可分割的辅音连缀组（划分音节时视为一个整体，绝对不拆开）
-#权威来源：Allen & Greenough §11, Wheelock's Latin 7th Edition
+# ====================== 全局常量定义 ======================
+# 不可分割的辅音连缀组（划分音节时视为一个整体，绝对不拆开）
+# 权威来源：Allen & Greenough §11, Wheelock's Latin 7th Edition
 CONSONANT_GROUPS = [
- "bl ",  "br ",  "pl ",  "pr ",  "dr ",  "tr ",  "cl ",  "cr ",  "fr ",  "fl ",  "gr ",  "gl ",
-# 送气塞音（古典拉丁语中是单个音素）
- "ch ",  "ph ",  "th ",
-# qu（永远作为一个辅音音素/kʷ/）
- "qu "
+    # 塞音+流音（唯一在元音之间可以整体归后的组合）
+    "bl", "br", "pl", "pr", "dr", "tr", "cl", "cr", "fr", "fl", "gr", "gl",
+    # 送气塞音（古典拉丁语中是单个音素）
+    "ch", "ph", "th",
+    # qu（永远作为一个辅音音素/kʷ/）
+    "qu"
 ]
 
-#长元音/短元音 → 普通元音映射（用于规范化判断）
-#同时支持长音符(macron)和短音符(breve)，统一转换为无变音符号的普通元音
+# 长元音/短元音 → 普通元音映射（用于规范化判断）
+# 同时支持长音符(macron)和短音符(breve)，统一转换为无变音符号的普通元音
 LONG_MARK_MAP = {
     # 长音符 (macron)
     'ā': 'a', 'ē': 'e', 'ī': 'i', 'ō': 'o', 'ū': 'u', 'ȳ': 'y',
@@ -25,42 +26,42 @@ LONG_MARK_MAP = {
     'Ă': 'A', 'Ĕ': 'E', 'Ĭ': 'I', 'Ŏ': 'O', 'Ŭ': 'U', 'Y̆': 'Y'
 }
 
-#普通元音 → 长元音映射（用于标重音）
-#只保留长元音映射，忽略短音符
+# 普通元音 → 长元音映射（用于标重音）
+# 只保留长元音映射，忽略短音符
 SHORT_TO_LONG_MAP = {v: k for k, v in LONG_MARK_MAP.items() if len(k) == 1 and k in ['ā', 'ē', 'ī', 'ō', 'ū', 'ȳ']}
 
-#拉丁语双元音（不可拆分，整体为一个元音）
+# 拉丁语双元音（不可拆分，整体为一个元音）
 DIPHTHONGS = ['ae', 'oe', 'au', 'eu', 'ei', 'ui']
 
-#短元音、长元音、全部元音
+# 短元音、长元音、全部元音
 SHORT_VOWELS = ['a', 'e', 'i', 'o', 'u', 'y']
 LONG_VOWELS = ['ā', 'ē', 'ī', 'ō', 'ū', 'ȳ']
 VOWELS = SHORT_VOWELS + LONG_VOWELS
 
-#拉丁语辅音字母
-#注：j和w是现代转写中使用的字母，古典拉丁语中无独立字母
-#j对应辅音i（半元音/j/），w对应辅音v（半元音/w/）
+# 拉丁语辅音字母
+# 注：j和w是现代转写中使用的字母，古典拉丁语中无独立字母
+# j对应辅音i（半元音/j/），w对应辅音v（半元音/w/）
 CONSONANTS = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p',
               'q', 'r', 's', 't', 'v', 'w', 'x', 'z']
 
-#塞音+流音组合（位置在元音之间时，不强制前面音节变长）
-#这是位置长音规则中唯一的例外
-#权威来源：Dickinson College Commentaries, Allen & Greenough §603
+# 塞音+流音组合（位置在元音之间时，不强制前面音节变长）
+# 这是位置长音规则中唯一的例外
+# 权威来源：Dickinson College Commentaries, Allen & Greenough §603
 STOP_LIQUID = [
     'pr', 'tr', 'cr', 'br', 'dr', 'fr', 'gr',
     'pl', 'cl', 'bl', 'fl', 'gl',
     'chl', 'chr', 'phl', 'phr', 'thl', 'thr'
 ]
 
-#特殊辅音计数：x=cs, z=ds，每个都算2个辅音
-#权威来源：Allen & Greenough §604
+# 特殊辅音计数：x=cs, z=ds，每个都算2个辅音
+# 权威来源：Allen & Greenough §604
 SPECIAL_CONSONANTS = {'x': 2, 'z': 2}
 
-#忽略的辅音：h只是送气符号，不算真正的辅音，不能关闭音节
+# 忽略的辅音：h只是送气符号，不算真正的辅音，不能关闭音节
 IGNORED_CONSONANTS = {'h'}
 
 # ====================== 新增：诗歌分析专用常量 ======================
-#你的音步名称映射表（完全采用）
+# 你的音步名称映射表（完全采用）
 FOOT_NAMES_MAP = {
     'SL': '抑扬格 (Iambus)',
     'LS': '扬抑格 (Trochee)',
@@ -73,10 +74,11 @@ FOOT_NAMES_MAP = {
     'SSS': '三短格 (Tribrach)'
 }
 
-#音步长度映射
+# 音步长度映射
 FOOT_LENGTHS = {k: len(k) for k in FOOT_NAMES_MAP.keys()}
 
-# ====================== 音素分析（你的原文，一字未改） ======================
+
+# ====================== 音素分析 ======================
 def sounder(word: str) -> list:
     """
     音素标记函数：把单词拆分成【元音/辅音】单元
@@ -230,7 +232,8 @@ def sounder(word: str) -> list:
 
     return chars
 
-# ====================== 音节划分核心（你的原文，一字未改） ======================
+
+# ====================== 音节划分核心 ======================
 def syllabify_word(word_sounds: list) -> list:
     """
     音节划分函数（拉丁语经典规则）
@@ -281,7 +284,8 @@ def syllabify_word(word_sounds: list) -> list:
 
     return syllables
 
-# ====================== 开/闭音节判断（你的原文，一字未改） ======================
+
+# ====================== 开/闭音节判断 ======================
 def mark_syllable_type(syllable: str, syllable_sounds: list) -> str:
     """
     判断音节类型：
@@ -298,45 +302,34 @@ def mark_syllable_type(syllable: str, syllable_sounds: list) -> str:
         return "закрытый"
     return "unknown"
 
-# ====================== 修正后的长/短音判断函数（你的原文，一字未改） ======================
+
+# ====================== 🌟 修正后的长/短音判断函数（严格按规则A/B/C） ======================
 def mark_syllable_length(syllable: str, syllable_sounds: list, is_last_syllable: bool = False) -> str:
     """
     完全符合古典拉丁语标准的音节音长判断
     权威来源：Allen & Greenough's Latin Grammar §600-612, Dickinson College Commentaries
     核心规则（优先级从高到低）：
-    1. 自然长音（natura）：
-       a. 包含长元音（ā, ē, ī, ō, ū, ȳ）
-       b. 包含双元音（ae, au, oe, ei, eu, ui）
-    2. 位置长音（positione）：
-       元音后有≥2个有效辅音（排除h，x/z各算2个）
-    3. 例外规则：
-       a. 词尾的m不算辅音（仅发鼻化音）
-       b. 恰好2个有效辅音且为塞音+流音组合时，不构成位置长音
-    其余所有情况均为短音
+    А. 自然长音 (Natura Longa)
+    Б. 位置长音 (Positione Longa)
+    В. 短音 (Brevis)
     """
     if not syllable or not syllable_sounds:
         return "короткий"
 
-    # 规则1b：优先检查双元音（双元音永远是长音，且不会标长音符号）
-    # 情况1：如果音素系统中双元音被表示为单个音素（如('v', 'ae')）
-    for sound_type, sound_char in syllable_sounds:
-        if sound_type == 'v' and len(sound_char) >= 2:
-            return "длинный"
-            
-    # 情况2：如果双元音被表示为两个连续元音音素，检查字母组合
-    pure_syllable = ''.join([LONG_MARK_MAP.get(c, c.lower()) for c in syllable])
-    for diphthong in DIPHTHONGS:
-        if diphthong in pure_syllable:
-            # 确保是连续的双元音，而不是分开的两个元音
-            if pure_syllable.find(diphthong) != -1:
-                return "длинный"
-
-    # 规则1a：检查长元音
+    # А. 自然长音 (Natura Longa)
+    # 1. 包含长元音（ā, ē, ī, ō, ū, ȳ）→ 长
     for char in syllable:
         if char in LONG_VOWELS:
             return "длинный"
+            
+    # 2. 包含双元音（ae, au, oe, ei, eu, ui）→ 长
+    pure_syllable = ''.join([LONG_MARK_MAP.get(c, c.lower()) for c in syllable])
+    for diphthong in DIPHTHONGS:
+        if diphthong in pure_syllable:
+            if pure_syllable.find(diphthong) != -1:
+                return "длинный"
 
-    # 收集元音后面的所有辅音
+    # 收集元音后面的所有有效辅音（忽略 h）
     consonants_after_vowel = []
     vowel_found = False
     for sound_type, sound_char in syllable_sounds:
@@ -344,31 +337,42 @@ def mark_syllable_length(syllable: str, syllable_sounds: list, is_last_syllable:
             vowel_found = True
             continue
         if vowel_found and sound_type == 'c':
-            consonants_after_vowel.append(sound_char.lower())
+            c_low = sound_char.lower()
+            if c_low != 'h':
+                consonants_after_vowel.append(c_low)
 
-    # 例外3a：处理词尾m（如果是最后一个音节，移除末尾的m）
-    if is_last_syllable and consonants_after_vowel and consonants_after_vowel[-1] == 'm':
-        consonants_after_vowel.pop()
+    if not consonants_after_vowel:
+        return "короткий"
 
-    # 计算有效辅音数量和辅音字符串
-    consonant_count = 0
-    consonant_str = ''
+    # Б. 位置长音 (Positione Longa)
+    # 计算有效辅音权重
+    eff_count = 0
     for c in consonants_after_vowel:
-        if c in IGNORED_CONSONANTS:
-            continue
-        consonant_count += SPECIAL_CONSONANTS.get(c, 1)
-        consonant_str += c
+        if c in ('x', 'z'):
+            eff_count += 2  # x, z = 2辅音
+        elif c in ('ch', 'th', 'ph'):
+            eff_count += 2  # 送气塞音 = 2辅音
+        elif c == 'qu':
+            eff_count += 1  # qu 整体算 1
+        elif c in STOP_LIQUID:
+            eff_count += 1  # 爆破音+流音 = 1（不延长）
+        else:
+            eff_count += 1  # 普通辅音 = 1
 
-    # 规则2：位置长音 + 例外3b
-    if consonant_count >= 2:
-        # 只有恰好2个有效辅音且为塞音+流音组合时，才不构成位置长音
-        if not (consonant_count == 2 and consonant_str in STOP_LIQUID):
-            return "длинный"
+    # Б.4 规则：词尾闭音节（-m, -n, -s, -t, -x, -d, -l, -r 等）→ 长
+    if is_last_syllable and eff_count >= 1:
+        return "длинный"
 
-    # 所有其他情况均为短音
+    # Б.1-3 规则：有效辅音数 >= 2 → 长
+    if eff_count >= 2:
+        return "длинный"
+
+    # В. 短音 (Brevis)
+    # 1个或0个有效辅音（且非词尾闭音节） → 短
     return "короткий"
 
-# ====================== 修正后的工具函数（你的原文，一字未改） ======================
+
+# ====================== 工具函数 ======================
 def syllable_to_str(syllable_sounds: list) -> str:
     """把音素结构转回普通字符串"""
     if not syllable_sounds:
@@ -390,30 +394,27 @@ def add_accent_to_syllable(syllable_str: str) -> str:
     syllable_lower = syllable_str.lower()
 
     # 规则1：优先处理双元音（重音加在第一个元音上）
-    # 检查所有双元音，找到第一个出现的
     for diph in DIPHTHONGS:
         diph_idx = syllable_lower.find(diph)
         if diph_idx != -1:
-            # 确认这两个字符都是元音（避免误判qu等组合中的u）
             if (syllable_lower[diph_idx] in VOWELS and 
                 syllable_lower[diph_idx+1] in VOWELS):
                 original_char = syllable_str[diph_idx]
-                # 使用Unicode组合锐音符 U+0301，正确叠加在字母上方
                 accented_char = f"{original_char}\u0301"
                 return syllable_str[:diph_idx] + accented_char + syllable_str[diph_idx+1:]
 
     # 规则2：处理单元音（按出现顺序找到第一个元音）
-    # 遍历每个字符，找到第一个元音（无论长短）
     for i, char in enumerate(syllable_str):
         char_lower = char.lower()
         if char_lower in VOWELS:
             accented_char = f"{char}\u0301"
             return syllable_str[:i] + accented_char + syllable_str[i+1:]
 
-    # 没有找到元音（理论上不可能，因为音节必须有元音）
+    # 没有找到元音（理论上不可能）
     return syllable_str
 
-# ====================== 修正后的拉丁语重音规则函数（你的原文，一字未改） ======================
+
+# ====================== 修正后的拉丁语重音规则函数 ======================
 def mark_accent_position(syllables_info: list) -> list:
     """
     完全符合古典拉丁语标准的重音位置判断
@@ -478,7 +479,8 @@ def mark_accent_position(syllables_info: list) -> list:
 
     return accented_syllables
 
-# ====================== 文本预处理（你的原文，一字未改） ======================
+
+# ====================== 文本预处理 ======================
 def worder(line: str) -> list:
     """
     文本清洗：
@@ -498,6 +500,7 @@ def worder(line: str) -> list:
     line = line.replace('x', 'cs').replace('z', 'ds')
     return [word.strip() for word in line.split() if word.strip()]
 
+
 # ====================== 新增：诗歌专用预处理（生成连续音流） ======================
 def poetry_preprocess(text: str) -> str:
     """
@@ -516,6 +519,7 @@ def poetry_preprocess(text: str) -> str:
     text = text.replace('x', 'cs').replace('z', 'ds')
     
     return text
+
 
 # ====================== 新增：诗歌核心-省音处理（Elision） ======================
 def apply_elision(text: str) -> str:
@@ -563,11 +567,7 @@ def apply_elision(text: str) -> str:
             
             # 规则2：元音尾省音
             if current_word[-1] in VOWELS and (next_first_char in VOWELS or next_first_char == 'h'):
-                # 双元音结尾只省略最后一个元音
-                if any(current_word.endswith(d) for d in DIPHTHONGS):
-                    merged_word = current_word[:-1] + next_word
-                else:
-                    merged_word = current_word[:-1] + next_word
+                merged_word = current_word[:-1] + next_word
                 processed_words.append(merged_word)
                 i += 2
                 continue
@@ -578,6 +578,7 @@ def apply_elision(text: str) -> str:
 
     # 合并成完全连续的字母流
     return ''.join(processed_words)
+
 
 # ====================== 新增：诗歌核心-连续音流音节划分 ======================
 def syllabify_continuous(sounds: list) -> list:
@@ -622,6 +623,7 @@ def syllabify_continuous(sounds: list) -> list:
 
     return syllables
 
+
 # ====================== 新增：通用音步匹配引擎（基于你的SL体系） ======================
 def match_foot(syllables_info: list, start_pos: int, allowed_feet: list = None) -> tuple:
     """
@@ -653,6 +655,7 @@ def match_foot(syllables_info: list, start_pos: int, allowed_feet: list = None) 
     if len(length_str) >= 2:
         return ('LL', 2)
     return ('L', 1)
+
 
 # ====================== 主处理函数（新增mode参数，散文/诗歌通用） ======================
 def process_latin_text(input_text: str, mode: str = "prose") -> list:
@@ -782,7 +785,8 @@ def process_latin_text(input_text: str, mode: str = "prose") -> list:
 
     return result_list
 
-# ====================== 统计与图表数据（新增诗歌模式支持 + 修复重复） ======================
+
+# ====================== 统计与图表数据（新增诗歌模式支持） ======================
 def analyze_statistics(processed_results):
     """
     统计功能（散文/诗歌通用）
@@ -803,7 +807,7 @@ def analyze_statistics(processed_results):
 
     for result in processed_results:
         if result.get("mode") == "prose":
-            # 散文模式统计
+            # 散文模式统计（完全保留你原有的逻辑）
             word_text = result['word']
             syllables = result['syllables']
             
@@ -835,7 +839,7 @@ def analyze_statistics(processed_results):
                 'ls_raw': ls_list
             })
             
-            # 散文模式音步统计（两两分组） - только для графиков
+            # 散文模式音步统计（两两分组）
             for i in range(0, len(syllables) - 1, 2):
                 if i + 1 >= len(syllables):
                     break
@@ -920,6 +924,7 @@ def analyze_statistics(processed_results):
         'feet_names_map': FOOT_NAMES_MAP
     }
 
+# ====================== 测试 ======================
 if __name__ == "__main__":
     test_text = "arma virumque cano aere perennius"
     processed = process_latin_text(test_text)
