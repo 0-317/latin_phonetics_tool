@@ -429,7 +429,6 @@
                 const table = $(tableId).DataTable();
                 table.clear().draw(false);
                 table.destroy(true);
-                // Re-append the original table structure to avoid DataTables wrapper issues
                 $(tableId).closest('.dataTables_wrapper').replaceWith($(tableId).clone(true));
             }
         }
@@ -458,35 +457,56 @@
 
         // 页面加载
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('btnSyllable').addEventListener('click', () => showPanel('panelSyllable'));
-            document.getElementById('btnOc').addEventListener('click', () => showPanel('panelOc'));
-            document.getElementById('btnLs').addEventListener('click', () => showPanel('panelLs'));
+            const btns = ['btnAnalyze', 'btnSyllable', 'btnOc', 'btnLs', 'btnFeet'];
+            btns.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', showAnalysis);
+                }
+            });
 
             {% if stats %}
-            const chartColors = ['#C9B18E', '#B8860B', '#D4B98C', '#8B7D6B'];
-            Object.values(chartInstances).forEach(c => c?.destroy());
+                showAnalysis();
+                
+                const chartColors = ['#C9B18E', '#B8860B', '#D4B98C', '#8B7D6B', '#B50404', '#4A3C28'];
+                
+                Object.values(chartInstances).forEach(chart => {if(chart)chart.destroy();});
 
-            // 开闭音节图表
-            chartInstances.oc = new Chart(document.getElementById('chartOc'), {
-                type: 'doughnut',
-                data: {
-                    labels: currentLang === 'zh' ? ['开音节', '闭音节'] : 
-                           currentLang === 'ru' ? ['Открытые', 'Закрытые'] : ['Open', 'Closed'],
-                    datasets: [{data: [{{ stats.open_count }}, {{ stats.closed_count }}], backgroundColor: chartColors.slice(0,2), borderWidth:1,borderColor:'#fff'}]
-                },
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
-            });
+                chartInstances.oc = new Chart(document.getElementById('chartOc'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['{{ L.open }}', '{{ L.closed }}'],
+                        datasets: [{
+                            data: [{{ stats.open_count }}, {{ stats.closed_count }}],
+                            backgroundColor: chartColors.slice(0,2),
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
 
-            // 长短音节图表
-            chartInstances.ls = new Chart(document.getElementById('chartLs'), {
-                type:'pie',
-                data:{
-                    labels: currentLang === 'zh' ? ['长音节','短音节'] :
-                           currentLang === 'ru' ? ['Длинные','Короткие'] : ['Long','Short'],
-                    datasets:[{data:[{{ stats.long_count }},{{ stats.short_count }}],backgroundColor:chartColors.slice(2,4),borderWidth:1,borderColor:'#fff'}]
-                },
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
-            });
+                chartInstances.ls = new Chart(document.getElementById('chartLs'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['{{ L.long }}', '{{ L.short }}'],
+                        datasets: [{
+                            data: [{{ stats.long_count }}, {{ stats.short_count }}],
+                            backgroundColor: chartColors.slice(2,4),
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
             {% endif %}
         });
     </script>
