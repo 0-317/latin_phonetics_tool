@@ -90,7 +90,7 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
-            transition: all 0.2s ease;
+            transition: 0.2s ease;
             font-family: inherit;
         }
         .lang-btn.active {
@@ -281,41 +281,32 @@
             <textarea name="latin_text" rows="6" placeholder="{{ L.placeholder }}">{{ input_content }}</textarea>
             
             <div class="btn-group">
-                <button class="func-btn" id="btnAnalyze">Показать анализ</button>
+                <button class="func-btn" id="btnSyllable">{{ L.btn_syllable }}</button>
+                <button class="func-btn" id="btnOc">{{ L.btn_oc }}</button>
+                <button class="func-btn" id="btnLs">{{ L.btn_ls }}</button>
             </div>
         </div>
 
         {% if stats %}
-        <h3>Детальный анализ слов</h3>
+        <h3>{{ L.detail_analysis }}</h3>
 
-        <div id="panelAnalysis">
+        <!-- 音节分析面板 -->
+        <div id="panelSyllable" class="hidden">
             <div class="table-box">
-                <table id="tableWords" class="display">
+                <table id="tableSyllable" class="display">
                     <thead>
                         <tr>
-                            <th width="10%">№</th>
-                            <th width="25%">Слово</th>
-                            <th width="25%">Слоги</th>
-                            <th width="20%">Тип (Откр./Закр.)</th>
-                            <th width="20%">Длина (Долг./Кратк.)</th>
+                            <th width="10%">{{ L.no }}</th>
+                            <th width="30%">{{ L.word_line }}</th>
+                            <th width="60%">{{ L.syllable_divide }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in stats.word_table %}
+                        {% for item in stats.feet_details %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td><strong>{{ item.word }}</strong></td>
-                            <td>{{ item.syllables_full }}</td>
-                            <td>
-                                {% for t in item.oc_raw %}
-                                    {% if t == 'открытый' %}{{ L.open }}{% else %}{{ L.closed }}{% endif %}{% if not loop.last %}, {% endif %}
-                                {% endfor %}
-                            </td>
-                            <td>
-                                {% for l in item.ls_raw %}
-                                    {% if l == 'длинный' %}{{ L.long }}{% else %}{{ L.short }}{% endif %}{% if not loop.last %}, {% endif %}
-                                {% endfor %}
-                            </td>
+                            <td>{{ item.word or item.line }}</td>
+                            <td>{{ item.syllable_pair }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -323,55 +314,116 @@
             </div>
         </div>
 
-        <h3 style="margin-top: 40px;">Статистика</h3>
+        <!-- 开闭音节面板 -->
+        <div id="panelOc" class="hidden">
+            <div class="table-box">
+                <table id="tableOc" class="display">
+                    <thead>
+                        <tr>
+                            <th width="10%">{{ L.no }}</th>
+                            <th width="45%">{{ L.word_line }}</th>
+                            <th width="45%">{{ L.syllable_type }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in stats.feet_details %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ item.word or item.line }}</td>
+                            <td>{{ item.oc or L.poetry_no }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 长短音节面板 -->
+        <div id="panelLs" class="hidden">
+            <div class="table-box">
+                <table id="tableWords" class="display">
+                    <thead>
+                        <tr>
+                            <th width="10%">{{ L.no }}</th>
+                            <th width="45%">{{ L.word_line }}</th>
+                            <th width="45%">{{ L.length_attr }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in stats.word_table %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ item.word or item.line }}</td>
+                            <td>{{ item.ls or L.poetry_no }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 40px;">{{ L.stat_analysis }}</h3>
         <p style="margin-bottom: 15px; font-size: 18px;">
-            Всего слов: <strong>{{ stats.total_items }}</strong> | 
-            Всего слогов: <strong>{{ stats.total_syllables }}</strong>
+            {{ L.total_items }}：<strong>{{ stats.total_items }}</strong> | 
+            {{ L.total_syllables }}：<strong>{{ stats.total_syllables }}</strong>
         </p>
         
         <div class="stats-grid">
+            <!-- 开闭音节图表 -->
             <div class="stat-card">
-                <h4>Открытые / Закрытые</h4>
+                <h4>{{ L.oc_stats }}</h4>
                 <div class="chart-container">
                     <canvas id="chartOc"></canvas>
                 </div>
             </div>
+            <!-- 长短音节图表 -->
             <div class="stat-card">
-                <h4>Долгие / Краткие</h4>
+                <h4>{{ L.ls_stats }}</h4>
                 <div class="chart-container">
                     <canvas id="chartLs"></canvas>
-                </div>
-            </div>
-            <div class="stat-card">
-                <h4>Распределение стоп</h4>
-                <div class="chart-container">
-                    <canvas id="chartFeet"></canvas>
                 </div>
             </div>
         </div>
 
         {% else %}
         <div class="empty">
-            <p>Пожалуйста, введите латинский текст выше</p>
-            <p style="margin-top: 10px; font-size: 16px;">Поддерживается анализ прозы</p>
+            <p>{{ L.empty_tip }}</p>
         </div>
         {% endif %}
     </div>
 
     <script>
         let chartInstances = {};
+        const currentLang = "{{ lang }}";
 
+        // 三语言数据表格配置
+        const langPack = {
+            zh: {
+                search: "搜索：", length: "显示 _MENU_ 条", info: "显示第 _START_ 到 _END_ 条，共 _TOTAL_ 条",
+                first: "首页", last: "末页", next: "下一页", prev: "上一页"
+            },
+            en: {
+                search: "Search:", length: "Show _MENU_ entries", info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                first: "First", last: "Last", next: "Next", prev: "Previous"
+            },
+            ru: {
+                search: "Поиск:", length: "Показать _MENU_ записей", info: "Показано с _START_ по _END_ из _TOTAL_ записей",
+                first: "Первая", last: "Последняя", next: "След.", prev: "Пред."
+            }
+        };
+        const dtLang = langPack[currentLang];
+
+        // 语言切换
         function switchLang(newLang) {
             const textArea = document.querySelector('textarea[name="latin_text"]');
             const text = textArea ? textArea.value.trim() : '';
             const params = new URLSearchParams();
             params.set('lang', newLang);
-            if (text) {
-                params.set('latin_text', text);
-            }
+            if (text) params.set('latin_text', text);
             location.href = `?${params.toString()}`;
         }
 
+        // 销毁表格
         function destroyDataTable(tableId) {
             if ($.fn.DataTable.isDataTable(tableId)) {
                 const table = $(tableId).DataTable();
@@ -382,107 +434,59 @@
             }
         }
 
-        function showAnalysis() {
-            const panel = document.getElementById('panelAnalysis');
-            if (panel) {
-                panel.classList.remove('hidden');
-                destroyDataTable('#tableWords');
-                setTimeout(() => {
-                    $('#tableWords').DataTable({
-                        paging: true,
-                        searching: true,
-                        ordering: true,
-                        autoWidth: false,
-                        order: [[0, 'asc']],
-                        stateSave: false,
-                        language: {
-                            search: 'Поиск:',
-                            lengthMenu: 'Показать _MENU_ записей',
-                            info: 'Записи с _START_ до _END_ из _TOTAL_',
-                            paginate: {
-                                first: 'Первая',
-                                last: 'Последняя',
-                                next: 'Следующая',
-                                previous: 'Предыдущая'
-                            }
-                        }
-                    });
-                }, 50);
-            }
+        // 显示面板
+        function showPanel(panelId) {
+            document.querySelectorAll('#panelSyllable, #panelOc, #panelLs').forEach(p => p.classList.add('hidden'));
+            destroyDataTable('#tableSyllable'); destroyDataTable('#tableOc'); destroyDataTable('#tableLs');
+            
+            const target = document.getElementById(panelId);
+            if (target) target.classList.remove('hidden');
+
+            setTimeout(() => {
+                const opts = {
+                    paging:true, searching:true, ordering:true, autoWidth:false, order:[[0,'asc']], stateSave:false,
+                    language: {
+                        search: dtLang.search, lengthMenu: dtLang.length, info: dtLang.info,
+                        paginate: {first: dtLang.first, last: dtLang.last, next: dtLang.next, previous: dtLang.prev}
+                    }
+                };
+                if (panelId === 'panelSyllable') $('#tableSyllable').DataTable(opts);
+                if (panelId === 'panelOc') $('#tableOc').DataTable(opts);
+                if (panelId === 'panelLs') $('#tableLs').DataTable(opts);
+            }, 50);
         }
 
+        // 页面加载
         document.addEventListener('DOMContentLoaded', function() {
-            // Привязываем все кнопки к показу анализа
-            const btns = ['btnAnalyze', 'btnSyllable', 'btnOc', 'btnLs', 'btnFeet'];
-            btns.forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.addEventListener('click', showAnalysis);
-                }
+            document.getElementById('btnSyllable').addEventListener('click', () => showPanel('panelSyllable'));
+            document.getElementById('btnOc').addEventListener('click', () => showPanel('panelOc'));
+            document.getElementById('btnLs').addEventListener('click', () => showPanel('panelLs'));
+
+            {% if stats %}
+            const chartColors = ['#C9B18E', '#B8860B', '#D4B98C', '#8B7D6B'];
+            Object.values(chartInstances).forEach(c => c?.destroy());
+
+            // 开闭音节图表
+            chartInstances.oc = new Chart(document.getElementById('chartOc'), {
+                type: 'doughnut',
+                data: {
+                    labels: currentLang === 'zh' ? ['开音节', '闭音节'] : 
+                           currentLang === 'ru' ? ['Открытые', 'Закрытые'] : ['Open', 'Closed'],
+                    datasets: [{data: [{{ stats.open_count }}, {{ stats.closed_count }}], backgroundColor: chartColors.slice(0,2), borderWidth:1,borderColor:'#fff'}]
+                },
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
             });
 
-            // Показываем анализ сразу при загрузке, если есть данные
-            {% if stats %}
-                showAnalysis();
-                
-                const chartColors = ['#C9B18E', '#B8860B', '#D4B98C', '#8B7D6B', '#B50404', '#4A3C28'];
-                
-                Object.values(chartInstances).forEach(chart => {if(chart)chart.destroy();});
-
-                chartInstances.oc = new Chart(document.getElementById('chartOc'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['{{ L.open }}', '{{ L.closed }}'],
-                        datasets: [{
-                            data: [{{ stats.open_count }}, {{ stats.closed_count }}],
-                            backgroundColor: chartColors.slice(0,2),
-                            borderWidth: 1,
-                            borderColor: '#fff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom' } }
-                    }
-                });
-
-                chartInstances.ls = new Chart(document.getElementById('chartLs'), {
-                    type: 'pie',
-                    data: {
-                        labels: ['{{ L.long }}', '{{ L.short }}'],
-                        datasets: [{
-                            data: [{{ stats.long_count }}, {{ stats.short_count }}],
-                            backgroundColor: chartColors.slice(2,4),
-                            borderWidth: 1,
-                            borderColor: '#fff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom' } }
-                    }
-                });
-
-                chartInstances.feet = new Chart(document.getElementById('chartFeet'), {
-                    type: 'bar',
-                    data: {
-                        labels: {{ stats.feet_labels|tojson }},
-                        datasets: [{
-                            data: {{ stats.feet_values|tojson }},
-                            backgroundColor: chartColors,
-                            borderWidth: 1,
-                            borderColor: '#fff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true } }
-                    }
-                });
+            // 长短音节图表
+            chartInstances.ls = new Chart(document.getElementById('chartLs'), {
+                type:'pie',
+                data:{
+                    labels: currentLang === 'zh' ? ['长音节','短音节'] :
+                           currentLang === 'ru' ? ['Длинные','Короткие'] : ['Long','Short'],
+                    datasets:[{data:[{{ stats.long_count }},{{ stats.short_count }}],backgroundColor:chartColors.slice(2,4),borderWidth:1,borderColor:'#fff'}]
+                },
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
+            });
             {% endif %}
         });
     </script>
