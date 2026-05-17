@@ -342,12 +342,6 @@
                     <canvas id="chartLs"></canvas>
                 </div>
             </div>
-            <div class="stat-card">
-                <h4>Распределение стоп</h4>
-                <div class="chart-container">
-                    <canvas id="chartFeet"></canvas>
-                </div>
-            </div>
         </div>
 
         {% else %}
@@ -377,7 +371,6 @@
                 const table = $(tableId).DataTable();
                 table.clear().draw(false);
                 table.destroy(true);
-                // Re-append the original table structure to avoid DataTables wrapper issues
                 $(tableId).closest('.dataTables_wrapper').replaceWith($(tableId).clone(true));
             }
         }
@@ -412,7 +405,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Привязываем все кнопки к показу анализа
             const btns = ['btnAnalyze', 'btnSyllable', 'btnOc', 'btnLs', 'btnFeet'];
             btns.forEach(id => {
                 const btn = document.getElementById(id);
@@ -421,7 +413,6 @@
                 }
             });
 
-            // Показываем анализ сразу при загрузке, если есть данные
             {% if stats %}
                 showAnalysis();
                 
@@ -462,25 +453,6 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: { legend: { position: 'bottom' } }
-                    }
-                });
-
-                chartInstances.feet = new Chart(document.getElementById('chartFeet'), {
-                    type: 'bar',
-                    data: {
-                        labels: {{ stats.feet_labels|tojson }},
-                        datasets: [{
-                            data: {{ stats.feet_values|tojson }},
-                            backgroundColor: chartColors,
-                            borderWidth: 1,
-                            borderColor: '#fff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true } }
                     }
                 });
             {% endif %}
