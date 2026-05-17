@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
@@ -341,7 +341,7 @@
         <!-- 长短音节面板 -->
         <div id="panelLs" class="hidden">
             <div class="table-box">
-                <table id="tableLs" class="display">
+                <table id="tableWords" class="display">
                     <thead>
                         <tr>
                             <th width="10%">{{ L.no }}</th>
@@ -350,7 +350,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in stats.feet_details %}
+                        {% for item in stats.word_table %}
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ item.word or item.line }}</td>
@@ -429,6 +429,7 @@
                 const table = $(tableId).DataTable();
                 table.clear().draw(false);
                 table.destroy(true);
+                // Re-append the original table structure to avoid DataTables wrapper issues
                 $(tableId).closest('.dataTables_wrapper').replaceWith($(tableId).clone(true));
             }
         }
