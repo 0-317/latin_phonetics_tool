@@ -88,7 +88,7 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
-            transition: all 0.2s ease;
+            transition: 0.2s ease;
             font-family: inherit;
         }
         .lang-btn.active {
@@ -162,22 +162,24 @@
 <div class="content-box">
     {% if lang == 'ru' %}
     <h2>Как пользоваться инструментом</h2>
-    <div class="step"><h3>Шаг 1: Введите латинский текст</h3><p>На главной странице введите текст или выберите готовый из библиотеки классических текстов.</p></div>
-    <div class="step"><h3>Шаг 2: Запустите анализ</h3><p>Нажмите кнопку «Разделить слоги и проанализировать» для запуска обработки.</p></div>
-    <div class="step"><h3>Шаг 3: Посмотрите статистику</h3><p>Изучите наглядные диаграммы: открытые/закрытые слоги, долгие/короткие слоги, пропорция стоп.</p></div>
-    <div class="step"><h3>Шаг 4: Работа с таблицей</h3><p>Используйте интерактивную таблицу для сортировки, поиска и фильтрации данных.</p></div>
+    <div class="step"><h3>Шаг 1: Введите латинский текст</h3><p>На главной странице введите латинский текст или выберите готовый из библиотеки классических текстов.</p></div>
+    <div class="step"><h3>Шаг 2: Запустите анализ</h3><p>Нажмите соответствующую кнопку для анализа слогов, открытости/закрытости или долготы слогов.</p></div>
+    <div class="step"><h3>Шаг 3: Посмотрите статистику</h3><p>Изучите наглядные диаграммы: статистика открытых/закрытых и долгих/коротких слогов.</p></div>
+    <div class="step"><h3>Шаг 4: Работа с таблицей</h3><p>Используйте интерактивную таблицу для сортировки, поиска и фильтрации результатов анализа.</p></div>
+
     {% elif lang == 'zh' %}
     <h2>工具使用教程</h2>
-    <div class="step"><h3>步骤1：输入拉丁文本</h3><p>在首页输入拉丁语，或从经典文本库选择预设内容。</p></div>
-    <div class="step"><h3>步骤2：启动分析</h3><p>点击「分割音节并分析」按钮开始处理。</p></div>
-    <div class="step"><h3>步骤3：查看统计图表</h3><p>查看开闭音节、长短音、音步分布的可视化图表。</p></div>
-    <div class="step"><h3>步骤4：使用分析表格</h3><p>表格支持排序、搜索、分页，可快速筛选数据。</p></div>
+    <div class="step"><h3>步骤1：输入拉丁文本</h3><p>在首页输入拉丁语内容，或从经典文本库中选择预设的文本。</p></div>
+    <div class="step"><h3>步骤2：启动分析功能</h3><p>点击对应按钮，分别分析音节划分、开闭音节与长短音属性。</p></div>
+    <div class="step"><h3>步骤3：查看统计图表</h3><p>查看开闭音节、长短音节的可视化统计图表。</p></div>
+    <div class="step"><h3>步骤4：使用分析表格</h3><p>表格支持排序、搜索、分页功能，可快速筛选查看分析结果。</p></div>
+
     {% else %}
     <h2>User Guide</h2>
-    <div class="step"><h3>Step 1: Enter Latin Text</h3><p>On the homepage, input text or select a classic text from the library.</p></div>
-    <div class="step"><h3>Step 2: Run Analysis</h3><p>Click the button to analyze syllables and metrics.</p></div>
-    <div class="step"><h3>Step 3: View Statistics</h3><p>Check charts for open/closed syllables, long/short vowels, metrical feet.</p></div>
-    <div class="step"><h3>Step 4: Use Data Table</h3><p>Sort, search, and filter detailed analysis results.</p></div>
+    <div class="step"><h3>Step 1: Enter Latin Text</h3><p>On the homepage, input Latin text or select a preset classic text from the library.</p></div>
+    <div class="step"><h3>Step 2: Run Analysis</h3><p>Click the corresponding buttons to analyze syllables, open/closed and long/short syllables.</p></div>
+    <div class="step"><h3>Step 3: View Statistics</h3><p>Check the visual charts for open/closed syllables and long/short syllables statistics.</p></div>
+    <div class="step"><h3>Step 4: Use Data Table</h3><p>Sort, search and filter the detailed analysis results with the interactive table.</p></div>
     {% endif %}
 </div>
 
