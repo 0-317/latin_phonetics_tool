@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
@@ -230,17 +230,6 @@
             position: relative;
         }
 
-        .foot-text {
-            padding: 18px;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 17px;
-            line-height: 2.2;
-            text-indent: 2em;
-            margin-top: 15px;
-            background: #fdfcf9;
-        }
-
         .empty {
             text-align: center;
             padding: 40px;
@@ -292,32 +281,41 @@
             <textarea name="latin_text" rows="6" placeholder="{{ L.placeholder }}">{{ input_content }}</textarea>
             
             <div class="btn-group">
-                <button class="func-btn" id="btnSyllable">分析音节</button>
-                <button class="func-btn" id="btnOc">分析开闭音节</button>
-                <button class="func-btn" id="btnLs">分析长短音节</button>
-                <button class="func-btn" id="btnFeet">分析音步</button>
+                <button class="func-btn" id="btnAnalyze">Показать анализ</button>
             </div>
         </div>
 
         {% if stats %}
-        <h3>详细分析</h3>
+        <h3>Детальный анализ слов</h3>
 
-        <div id="panelSyllable" class="hidden">
+        <div id="panelAnalysis">
             <div class="table-box">
-                <table id="tableSyllable" class="display">
+                <table id="tableWords" class="display">
                     <thead>
                         <tr>
-                            <th width="10%">序号</th>
-                            <th width="30%">单词/诗句</th>
-                            <th width="60%">音节划分</th>
+                            <th width="10%">№</th>
+                            <th width="25%">Слово</th>
+                            <th width="25%">Слоги</th>
+                            <th width="20%">Тип (Откр./Закр.)</th>
+                            <th width="20%">Длина (Долг./Кратк.)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in stats.feet_details %}
+                        {% for item in stats.word_table %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ item.word or item.line }}</td>
-                            <td>{{ item.syllable_pair }}</td>
+                            <td><strong>{{ item.word }}</strong></td>
+                            <td>{{ item.syllables_full }}</td>
+                            <td>
+                                {% for t in item.oc_raw %}
+                                    {% if t == 'открытый' %}{{ L.open }}{% else %}{{ L.closed }}{% endif %}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for l in item.ls_raw %}
+                                    {% if l == 'длинный' %}{{ L.long }}{% else %}{{ L.short }}{% endif %}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -325,83 +323,27 @@
             </div>
         </div>
 
-        <div id="panelOc" class="hidden">
-            <div class="table-box">
-                <table id="tableOc" class="display">
-                    <thead>
-                        <tr>
-                            <th width="10%">序号</th>
-                            <th width="45%">单词/诗句</th>
-                            <th width="45%">音节类型</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in stats.feet_details %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ item.word or item.line }}</td>
-                            <td>{{ item.oc or '诗歌模式不区分' }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="panelLs" class="hidden">
-            <div class="table-box">
-                <table id="tableLs" class="display">
-                    <thead>
-                        <tr>
-                            <th width="10%">序号</th>
-                            <th width="45%">单词/诗句</th>
-                            <th width="45%">音长属性</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in stats.feet_details %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ item.word or item.line }}</td>
-                            <td>{{ item.ls or '诗歌模式不区分' }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="panelFeet" class="hidden">
-            <div class="foot-text" style="line-height: 1.8; font-size: 1.1em; letter-spacing: 0.5px;">
-                {% set full_text = [] %}
-                {% for item in stats.feet_details %}
-                    {% set _ = full_text.append(item.syllable_pair + "(<strong>" + item.pattern + "</strong>)") %}
-                {% endfor %}
-                {{ full_text|join(' | ') }}
-            </div>
-        </div>
-
-        <h3 style="margin-top: 40px;">统计分析</h3>
+        <h3 style="margin-top: 40px;">Статистика</h3>
         <p style="margin-bottom: 15px; font-size: 18px;">
-            总项目数：<strong>{{ stats.total_items }}</strong> | 
-            总音节数：<strong>{{ stats.total_syllables }}</strong>
+            Всего слов: <strong>{{ stats.total_items }}</strong> | 
+            Всего слогов: <strong>{{ stats.total_syllables }}</strong>
         </p>
         
         <div class="stats-grid">
             <div class="stat-card">
-                <h4>开闭音节统计</h4>
+                <h4>Открытые / Закрытые</h4>
                 <div class="chart-container">
                     <canvas id="chartOc"></canvas>
                 </div>
             </div>
             <div class="stat-card">
-                <h4>长短音节统计</h4>
+                <h4>Долгие / Краткие</h4>
                 <div class="chart-container">
                     <canvas id="chartLs"></canvas>
                 </div>
             </div>
             <div class="stat-card">
-                <h4>音步类型统计</h4>
+                <h4>Распределение стоп</h4>
                 <div class="chart-container">
                     <canvas id="chartFeet"></canvas>
                 </div>
@@ -410,8 +352,8 @@
 
         {% else %}
         <div class="empty">
-            <p>请在上方输入框中粘贴拉丁文本</p>
-            <p style="margin-top: 10px; font-size: 16px;">支持散文 + 诗歌（六步格/哀歌双行体）</p>
+            <p>Пожалуйста, введите латинский текст выше</p>
+            <p style="margin-top: 10px; font-size: 16px;">Поддерживается анализ прозы</p>
         </div>
         {% endif %}
     </div>
@@ -435,79 +377,112 @@
                 const table = $(tableId).DataTable();
                 table.clear().draw(false);
                 table.destroy(true);
+                // Re-append the original table structure to avoid DataTables wrapper issues
                 $(tableId).closest('.dataTables_wrapper').replaceWith($(tableId).clone(true));
             }
         }
 
-        function showPanel(panelId) {
-            document.querySelectorAll('#panelSyllable, #panelOc, #panelLs, #panelFeet').forEach(panel => {
-                panel.classList.add('hidden');
-            });
-
-            destroyDataTable('#tableSyllable');
-            destroyDataTable('#tableOc');
-            destroyDataTable('#tableLs');
-
-            const targetPanel = document.getElementById(panelId);
-            if (targetPanel) {
-                targetPanel.classList.remove('hidden');
+        function showAnalysis() {
+            const panel = document.getElementById('panelAnalysis');
+            if (panel) {
+                panel.classList.remove('hidden');
+                destroyDataTable('#tableWords');
+                setTimeout(() => {
+                    $('#tableWords').DataTable({
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        autoWidth: false,
+                        order: [[0, 'asc']],
+                        stateSave: false,
+                        language: {
+                            search: 'Поиск:',
+                            lengthMenu: 'Показать _MENU_ записей',
+                            info: 'Записи с _START_ до _END_ из _TOTAL_',
+                            paginate: {
+                                first: 'Первая',
+                                last: 'Последняя',
+                                next: 'Следующая',
+                                previous: 'Предыдущая'
+                            }
+                        }
+                    });
+                }, 50);
             }
-
-            setTimeout(() => {
-                switch (panelId) {
-                    case 'panelSyllable':
-                        $('#tableSyllable').DataTable({paging:true,searching:true,ordering:true,autoWidth:false,order:[[0,'asc']],stateSave:false,
-                        language:{search:'搜索：',lengthMenu:'显示 _MENU_ 条',info:'显示第 _START_ 到 _END_ 条，共 _TOTAL_ 条',paginate:{first:'首页',last:'末页',next:'下一页',previous:'上一页'}}});
-                        break;
-                    case 'panelOc':
-                        $('#tableOc').DataTable({paging:true,searching:true,ordering:true,autoWidth:false,order:[[0,'asc']],stateSave:false,
-                        language:{search:'搜索：',lengthMenu:'显示 _MENU_ 条',info:'显示第 _START_ 到 _END_ 条，共 _TOTAL_ 条',paginate:{first:'首页',last:'末页',next:'下一页',previous:'上一页'}}});
-                        break;
-                    case 'panelLs':
-                        $('#tableLs').DataTable({paging:true,searching:true,ordering:true,autoWidth:false,order:[[0,'asc']],stateSave:false,
-                        language:{search:'搜索：',lengthMenu:'显示 _MENU_ 条',info:'显示第 _START_ 到 _END_ 条，共 _TOTAL_ 条',paginate:{first:'首页',last:'末页',next:'下一页',previous:'上一页'}}});
-                        break;
-                }
-            }, 50);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('btnSyllable').addEventListener('click', () => showPanel('panelSyllable'));
-            document.getElementById('btnOc').addEventListener('click', () => showPanel('panelOc'));
-            document.getElementById('btnLs').addEventListener('click', () => showPanel('panelLs'));
-            document.getElementById('btnFeet').addEventListener('click', () => showPanel('panelFeet'));
+            // Привязываем все кнопки к показу анализа
+            const btns = ['btnAnalyze', 'btnSyllable', 'btnOc', 'btnLs', 'btnFeet'];
+            btns.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', showAnalysis);
+                }
+            });
 
+            // Показываем анализ сразу при загрузке, если есть данные
             {% if stats %}
-            const chartColors = ['#C9B18E', '#B8860B', '#D4B98C', '#8B7D6B', '#B50404', '#4A3C28'];
-            
-            Object.values(chartInstances).forEach(chart => {if(chart)chart.destroy();});
+                showAnalysis();
+                
+                const chartColors = ['#C9B18E', '#B8860B', '#D4B98C', '#8B7D6B', '#B50404', '#4A3C28'];
+                
+                Object.values(chartInstances).forEach(chart => {if(chart)chart.destroy();});
 
-            chartInstances.oc = new Chart(document.getElementById('chartOc'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['开音节', '闭音节'],
-                    datasets: [{data: [{{ stats.open_count }}, {{ stats.closed_count }}],backgroundColor: chartColors.slice(0,2),borderWidth:1,borderColor:'#fff'}]
-                },
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
-            });
+                chartInstances.oc = new Chart(document.getElementById('chartOc'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['{{ L.open }}', '{{ L.closed }}'],
+                        datasets: [{
+                            data: [{{ stats.open_count }}, {{ stats.closed_count }}],
+                            backgroundColor: chartColors.slice(0,2),
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
 
-            chartInstances.ls = new Chart(document.getElementById('chartLs'), {
-                type:'pie',
-                data:{
-                    labels:['长音节','短音节'],
-                    datasets:[{data:[{{ stats.long_count }},{{ stats.short_count }}],backgroundColor:chartColors.slice(2,4),borderWidth:1,borderColor:'#fff'}]
-                },
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
-            });
+                chartInstances.ls = new Chart(document.getElementById('chartLs'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['{{ L.long }}', '{{ L.short }}'],
+                        datasets: [{
+                            data: [{{ stats.long_count }}, {{ stats.short_count }}],
+                            backgroundColor: chartColors.slice(2,4),
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
 
-            chartInstances.feet = new Chart(document.getElementById('chartFeet'), {
-                type:'bar',
-                data:{
-                    labels:{{ stats.feet_labels|tojson }},
-                    datasets:[{data:{{ stats.feet_values|tojson }},backgroundColor:chartColors,borderWidth:1,borderColor:'#fff'}]
-                },
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
-            });
+                chartInstances.feet = new Chart(document.getElementById('chartFeet'), {
+                    type: 'bar',
+                    data: {
+                        labels: {{ stats.feet_labels|tojson }},
+                        datasets: [{
+                            data: {{ stats.feet_values|tojson }},
+                            backgroundColor: chartColors,
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
             {% endif %}
         });
     </script>
