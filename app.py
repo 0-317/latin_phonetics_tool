@@ -1,4 +1,4 @@
-﻿# 导入 Flask 框架核心模块
+# 导入 Flask 框架核心模块
 from flask import Flask, render_template, request
 
 # 导入核心算法：文本处理 + 统计分析（来自 project/hexingongneng.py）
@@ -151,34 +151,34 @@ LANGUAGE_MAP = {
 # ====================== 经典文本库（无修改） ======================
 CLASSICTEXTS = [
     {
-        "name_ru": "1. Энеида (Вергилий) — начало",
-        "name_zh": "1. 埃涅阿斯纪 维吉尔 — 开篇",
-        "name_en": "1. Aeneid (Vergil) — opening",
-        "text": "Arma virumque cano, Troiae qui primus ab oris Italiam, fato profugus, Lavinaque venit litora."
+        "name_ru": "1. Энеида (Вергилий) — начало ",
+        "name_zh": "1. 埃涅阿斯纪 维吉尔 — 开篇 ",
+        "name_en": "1. Aeneid (Vergil) — opening ",
+        "text": "Arma virumque cano, Troiae qui primus ab oris Italiam, fato profugus, Lavinaque venit litora. "
     },
     {
-        "name_ru": "2. Энеида — «Карфаген должен быть разрушен»",
-        "name_zh": "2. 埃涅阿斯纪 — 迦太基必将毁灭",
-        "name_en": "2. Aeneid — Carthago delenda est",
-        "text": "Delenda est Carthago. Ceterum censeo Carthaginem esse delendam."
+        "name_ru": "2. Энеида — «Карфаген должен быть разрушен» ",
+        "name_zh": "2. 埃涅阿斯纪 — 迦太基必将毁灭 ",
+        "name_en": "2. Aeneid — Carthago delenda est ",
+        "text": "Delenda est Carthago. Ceterum censeo Carthaginem esse delendam. "
     },
     {
-        "name_ru": "3. O tempora, o mores! (Цицерон)",
-        "name_zh": "3. 哦时代！哦风气！（西塞罗）",
-        "name_en": "3. O tempora, o mores! (Cicero)",
-        "text": "O tempora, o mores! Quid prius dicam de stupris, quid de caedibus?"
+        "name_ru": "3. O tempora, o mores! (Цицерон) ",
+        "name_zh": "3. 哦时代！哦风气！（西塞罗） ",
+        "name_en": "3. O tempora, o mores! (Cicero) ",
+        "text": "O tempora, o mores! Quid prius dicam de stupris, quid de caedibus? "
     },
     {
-        "name_ru": "4. Гаил Юлий Цезарь — «Галлия вся делится на три части»",
-        "name_zh": "4. 高卢战记 凯撒 — 整个高卢分为三部分",
-        "name_en": "4. Gallic Wars (Caesar) — opening",
-        "text": "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae."
+        "name_ru": "4. Гаил Юлий Цезарь — «Галлия вся делится на три части» ",
+        "name_zh": "4. 高卢战记 凯撒 — 整个高卢分为三部分 ",
+        "name_en": "4. Gallic Wars (Caesar) — opening ",
+        "text": "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae. "
     },
     {
-        "name_ru": "5. «Пришел, увидел, победил» (Цезарь)",
-        "name_zh": "5. 我来，我见，我征服（凯撒）",
-        "name_en": "5. Veni, vidi, vici (Caesar)",
-        "text": "Veni, vidi, vici. Ergo omnia vincit amor."
+        "name_ru": "5. «Пришел, увидел, победил» (Цезарь) ",
+        "name_zh": "5. 我来，我见，我征服（凯撒） ",
+        "name_en": "5. Veni, vidi, vici (Caesar) ",
+        "text": "Veni, vidi, vici. Ergo omnia vincit amor. "
     }
 ]
 
@@ -189,7 +189,7 @@ def index():
     if lang not in LANGUAGE_MAP:
         lang = 'ru'
     L = LANGUAGE_MAP[lang]
-
+    
     # 初始化内容
     input_content = ""
     latin_result = []
@@ -207,36 +207,6 @@ def index():
         if latin_result:
             stats_data = analyze_statistics(latin_result)
 
-            if stats_data and 'feet_details' in stats_data:
-                for item in stats_data['feet_details']:
-                    for wd in latin_result:
-                        if wd['word'] == item['word']:
-                            sp = item['syllable_pair'].split('-')
-                            if len(sp) == 2:
-                                s1, s2 = sp[0], sp[1]
-                                s1t = s2t = s1l = s2l = ''
-                                for syl in wd['syllables']:
-                                    if syl['syllable_str'] == s1:
-                                        s1t = syl['type']
-                                        s1l = syl['length']
-                                    if syl['syllable_str'] == s2:
-                                        s2t = syl['type']
-                                        s2l = syl['length']
-
-                                def t(v):
-                                    if v == 'открытый': return L['open']
-                                    if v == 'закрытый': return L['closed']
-                                    return ''
-                                def l(v):
-                                    if v == 'длинный': return L['long']
-                                    if v == 'короткий': return L['short']
-                                    return ''
-
-                                item['oc'] = f"{s1} ({t(s1t)}) + {s2} ({t(s2t)})"
-                                item['ls'] = f"{s1} ({l(s1l)}) + {s2} ({l(s2l)})"
-                                item['name_local'] = L['foot_names'].get(item['pattern'], 'Неизвестно')
-                            break
-
     return render_template(
         'index.html', 
         result=latin_result,
@@ -244,7 +214,8 @@ def index():
         lang=lang,
         L=L,
         classic_texts=CLASSICTEXTS,
-        input_content=input_content
+        input_content=input_content,
+        zip=zip  # Передаем zip на всякий случай
     )
 
 # ====================== 新增：5个页面路由（6页网站完成） ======================
