@@ -90,7 +90,7 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
-            transition: all 0.2s ease;
+            transition: 0.2s ease;
             font-family: inherit;
         }
         .lang-btn.active {
@@ -230,17 +230,6 @@
             position: relative;
         }
 
-        .foot-text {
-            padding: 18px;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 17px;
-            line-height: 2.2;
-            text-indent: 2em;
-            margin-top: 15px;
-            background: #fdfcf9;
-        }
-
         .empty {
             text-align: center;
             padding: 40px;
@@ -292,24 +281,24 @@
             <textarea name="latin_text" rows="6" placeholder="{{ L.placeholder }}">{{ input_content }}</textarea>
             
             <div class="btn-group">
-                <button class="func-btn" id="btnSyllable">分析音节</button>
-                <button class="func-btn" id="btnOc">分析开闭音节</button>
-                <button class="func-btn" id="btnLs">分析长短音节</button>
-                <button class="func-btn" id="btnFeet">分析音步</button>
+                <button class="func-btn" id="btnSyllable">{{ L.btn_syllable }}</button>
+                <button class="func-btn" id="btnOc">{{ L.btn_oc }}</button>
+                <button class="func-btn" id="btnLs">{{ L.btn_ls }}</button>
             </div>
         </div>
 
         {% if stats %}
-        <h3>详细分析</h3>
+        <h3>{{ L.detail_analysis }}</h3>
 
+        <!-- 音节分析面板 -->
         <div id="panelSyllable" class="hidden">
             <div class="table-box">
                 <table id="tableSyllable" class="display">
                     <thead>
                         <tr>
-                            <th width="10%">序号</th>
-                            <th width="30%">单词/诗句</th>
-                            <th width="60%">音节划分</th>
+                            <th width="10%">{{ L.no }}</th>
+                            <th width="30%">{{ L.word_line }}</th>
+                            <th width="60%">{{ L.syllable_divide }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -325,14 +314,15 @@
             </div>
         </div>
 
+        <!-- 开闭音节面板 -->
         <div id="panelOc" class="hidden">
             <div class="table-box">
                 <table id="tableOc" class="display">
                     <thead>
                         <tr>
-                            <th width="10%">序号</th>
-                            <th width="45%">单词/诗句</th>
-                            <th width="45%">音节类型</th>
+                            <th width="10%">{{ L.no }}</th>
+                            <th width="45%">{{ L.word_line }}</th>
+                            <th width="45%">{{ L.syllable_type }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -340,7 +330,7 @@
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ item.word or item.line }}</td>
-                            <td>{{ item.oc or '诗歌模式不区分' }}</td>
+                            <td>{{ item.oc or L.poetry_no }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -348,14 +338,15 @@
             </div>
         </div>
 
+        <!-- 长短音节面板 -->
         <div id="panelLs" class="hidden">
             <div class="table-box">
                 <table id="tableLs" class="display">
                     <thead>
                         <tr>
-                            <th width="10%">序号</th>
-                            <th width="45%">单词/诗句</th>
-                            <th width="45%">音长属性</th>
+                            <th width="10%">{{ L.no }}</th>
+                            <th width="45%">{{ L.word_line }}</th>
+                            <th width="45%">{{ L.length_attr }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -363,7 +354,7 @@
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ item.word or item.line }}</td>
-                            <td>{{ item.ls or '诗歌模式不区分' }}</td>
+                            <td>{{ item.ls or L.poetry_no }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -371,63 +362,68 @@
             </div>
         </div>
 
-        <div id="panelFeet" class="hidden">
-            <div class="foot-text" style="line-height: 1.8; font-size: 1.1em; letter-spacing: 0.5px;">
-                {% set full_text = [] %}
-                {% for item in stats.feet_details %}
-                    {% set _ = full_text.append(item.syllable_pair + "(<strong>" + item.pattern + "</strong>)") %}
-                {% endfor %}
-                {{ full_text|join(' | ') }}
-            </div>
-        </div>
-
-        <h3 style="margin-top: 40px;">统计分析</h3>
+        <h3 style="margin-top: 40px;">{{ L.stat_analysis }}</h3>
         <p style="margin-bottom: 15px; font-size: 18px;">
-            总项目数：<strong>{{ stats.total_items }}</strong> | 
-            总音节数：<strong>{{ stats.total_syllables }}</strong>
+            {{ L.total_items }}：<strong>{{ stats.total_items }}</strong> | 
+            {{ L.total_syllables }}：<strong>{{ stats.total_syllables }}</strong>
         </p>
         
         <div class="stats-grid">
+            <!-- 开闭音节图表 -->
             <div class="stat-card">
-                <h4>开闭音节统计</h4>
+                <h4>{{ L.oc_stats }}</h4>
                 <div class="chart-container">
                     <canvas id="chartOc"></canvas>
                 </div>
             </div>
+            <!-- 长短音节图表 -->
             <div class="stat-card">
-                <h4>长短音节统计</h4>
+                <h4>{{ L.ls_stats }}</h4>
                 <div class="chart-container">
                     <canvas id="chartLs"></canvas>
-                </div>
-            </div>
-            <div class="stat-card">
-                <h4>音步类型统计</h4>
-                <div class="chart-container">
-                    <canvas id="chartFeet"></canvas>
                 </div>
             </div>
         </div>
 
         {% else %}
         <div class="empty">
-            <p>请在上方输入框中粘贴拉丁文本</p>
+            <p>{{ L.empty_tip }}</p>
+        </div>
         {% endif %}
     </div>
 
     <script>
         let chartInstances = {};
+        const currentLang = "{{ lang }}";
 
+        // 三语言数据表格配置
+        const langPack = {
+            zh: {
+                search: "搜索：", length: "显示 _MENU_ 条", info: "显示第 _START_ 到 _END_ 条，共 _TOTAL_ 条",
+                first: "首页", last: "末页", next: "下一页", prev: "上一页"
+            },
+            en: {
+                search: "Search:", length: "Show _MENU_ entries", info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                first: "First", last: "Last", next: "Next", prev: "Previous"
+            },
+            ru: {
+                search: "Поиск:", length: "Показать _MENU_ записей", info: "Показано с _START_ по _END_ из _TOTAL_ записей",
+                first: "Первая", last: "Последняя", next: "След.", prev: "Пред."
+            }
+        };
+        const dtLang = langPack[currentLang];
+
+        // 语言切换
         function switchLang(newLang) {
             const textArea = document.querySelector('textarea[name="latin_text"]');
             const text = textArea ? textArea.value.trim() : '';
             const params = new URLSearchParams();
             params.set('lang', newLang);
-            if (text) {
-                params.set('latin_text', text);
-            }
+            if (text) params.set('latin_text', text);
             location.href = `?${params.toString()}`;
         }
 
+        // 销毁表格
         function destroyDataTable(tableId) {
             if ($.fn.DataTable.isDataTable(tableId)) {
                 const table = $(tableId).DataTable();
@@ -437,74 +433,58 @@
             }
         }
 
+        // 显示面板
         function showPanel(panelId) {
-            document.querySelectorAll('#panelSyllable, #panelOc, #panelLs, #panelFeet').forEach(panel => {
-                panel.classList.add('hidden');
-            });
-
-            destroyDataTable('#tableSyllable');
-            destroyDataTable('#tableOc');
-            destroyDataTable('#tableLs');
-
-            const targetPanel = document.getElementById(panelId);
-            if (targetPanel) {
-                targetPanel.classList.remove('hidden');
-            }
+            document.querySelectorAll('#panelSyllable, #panelOc, #panelLs').forEach(p => p.classList.add('hidden'));
+            destroyDataTable('#tableSyllable'); destroyDataTable('#tableOc'); destroyDataTable('#tableLs');
+            
+            const target = document.getElementById(panelId);
+            if (target) target.classList.remove('hidden');
 
             setTimeout(() => {
-                switch (panelId) {
-                    case 'panelSyllable':
-                        $('#tableSyllable').DataTable({paging:true,searching:true,ordering:true,autoWidth:false,order:[[0,'asc']],stateSave:false,
-                        language:{search:'搜索：',lengthMenu:'显示 _MENU_ 条',info:'显示第 _START_ 到 _END_ 条，共 _TOTAL_ 条',paginate:{first:'首页',last:'末页',next:'下一页',previous:'上一页'}}});
-                        break;
-                    case 'panelOc':
-                        $('#tableOc').DataTable({paging:true,searching:true,ordering:true,autoWidth:false,order:[[0,'asc']],stateSave:false,
-                        language:{search:'搜索：',lengthMenu:'显示 _MENU_ 条',info:'显示第 _START_ 到 _END_ 条，共 _TOTAL_ 条',paginate:{first:'首页',last:'末页',next:'下一页',previous:'上一页'}}});
-                        break;
-                    case 'panelLs':
-                        $('#tableLs').DataTable({paging:true,searching:true,ordering:true,autoWidth:false,order:[[0,'asc']],stateSave:false,
-                        language:{search:'搜索：',lengthMenu:'显示 _MENU_ 条',info:'显示第 _START_ 到 _END_ 条，共 _TOTAL_ 条',paginate:{first:'首页',last:'末页',next:'下一页',previous:'上一页'}}});
-                        break;
-                }
+                const opts = {
+                    paging:true, searching:true, ordering:true, autoWidth:false, order:[[0,'asc']], stateSave:false,
+                    language: {
+                        search: dtLang.search, lengthMenu: dtLang.length, info: dtLang.info,
+                        paginate: {first: dtLang.first, last: dtLang.last, next: dtLang.next, previous: dtLang.prev}
+                    }
+                };
+                if (panelId === 'panelSyllable') $('#tableSyllable').DataTable(opts);
+                if (panelId === 'panelOc') $('#tableOc').DataTable(opts);
+                if (panelId === 'panelLs') $('#tableLs').DataTable(opts);
             }, 50);
         }
 
+        // 页面加载
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('btnSyllable').addEventListener('click', () => showPanel('panelSyllable'));
             document.getElementById('btnOc').addEventListener('click', () => showPanel('panelOc'));
             document.getElementById('btnLs').addEventListener('click', () => showPanel('panelLs'));
-            document.getElementById('btnFeet').addEventListener('click', () => showPanel('panelFeet'));
 
             {% if stats %}
-            const chartColors = ['#C9B18E', '#B8860B', '#D4B98C', '#8B7D6B', '#B50404', '#4A3C28'];
-            
-            Object.values(chartInstances).forEach(chart => {if(chart)chart.destroy();});
+            const chartColors = ['#C9B18E', '#B8860B', '#D4B98C', '#8B7D6B'];
+            Object.values(chartInstances).forEach(c => c?.destroy());
 
+            // 开闭音节图表
             chartInstances.oc = new Chart(document.getElementById('chartOc'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['开音节', '闭音节'],
-                    datasets: [{data: [{{ stats.open_count }}, {{ stats.closed_count }}],backgroundColor: chartColors.slice(0,2),borderWidth:1,borderColor:'#fff'}]
+                    labels: currentLang === 'zh' ? ['开音节', '闭音节'] : 
+                           currentLang === 'ru' ? ['Открытые', 'Закрытые'] : ['Open', 'Closed'],
+                    datasets: [{data: [{{ stats.open_count }}, {{ stats.closed_count }}], backgroundColor: chartColors.slice(0,2), borderWidth:1,borderColor:'#fff'}]
                 },
                 options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
             });
 
+            // 长短音节图表
             chartInstances.ls = new Chart(document.getElementById('chartLs'), {
                 type:'pie',
                 data:{
-                    labels:['长音节','短音节'],
+                    labels: currentLang === 'zh' ? ['长音节','短音节'] :
+                           currentLang === 'ru' ? ['Длинные','Короткие'] : ['Long','Short'],
                     datasets:[{data:[{{ stats.long_count }},{{ stats.short_count }}],backgroundColor:chartColors.slice(2,4),borderWidth:1,borderColor:'#fff'}]
                 },
                 options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
-            });
-
-            chartInstances.feet = new Chart(document.getElementById('chartFeet'), {
-                type:'bar',
-                data:{
-                    labels:{{ stats.feet_labels|tojson }},
-                    datasets:[{data:{{ stats.feet_values|tojson }},backgroundColor:chartColors,borderWidth:1,borderColor:'#fff'}]
-                },
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
             });
             {% endif %}
         });
